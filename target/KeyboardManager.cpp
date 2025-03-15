@@ -98,28 +98,42 @@ QString KeyboardManager::mapModifierKeysToNames(int modifiers) {
     return modifierNames.join(" + ");
 }
 
-void KeyboardManager::handleKeyboardAction(int keyCode, int modifiers, bool isKeyDown) {
+void KeyboardManager::handleKeyboardAction(int keyCode, int modifiers, bool isKeyDown, bool isNativeVirtualKey) {
     QByteArray keyData = CMD_SEND_KB_GENERAL_DATA;
     unsigned int combinedModifiers = 0;
 
     // Debug the incoming key code with modifier names
     qCDebug(log_keyboard) << "Processing key:" << QString::number(keyCode) + "(0x" + QString::number(keyCode, 16) + ")"
                          << "with modifiers:" << mapModifierKeysToNames(modifiers)
-                         << "isKeyDown:" << isKeyDown;
+                         << "isKeyDown:" << isKeyDown
+                         << "isNativeVirtualKey:" << isNativeVirtualKey;
 
-    
-    // Check if it's a function key
-    if (keyCode >= Qt::Key_F1 && keyCode <= Qt::Key_F12) {
-        qCDebug(log_keyboard) << "Function key detected:" << keyCode;
-    }
+    if(!isNativeVirtualKey){
+        // Check if it's a function key
+        if (keyCode >= Qt::Key_F1 && keyCode <= Qt::Key_F12) {
+            qCDebug(log_keyboard) << "Function key detected:" << keyCode;
+        }
 
-    // Check if it's a navigation key
-    if (keyCode >= Qt::Key_Left && keyCode <= Qt::Key_PageDown) {
-        qCDebug(log_keyboard) << "Navigation key detected:" << keyCode;
+        // Check if it's a navigation key
+        if (keyCode >= Qt::Key_Left && keyCode <= Qt::Key_PageDown) {
+            qCDebug(log_keyboard) << "Navigation key detected:" << keyCode;
+        }
     }
 
     // Use current layout's keyMap instead of the static one
-    mappedKeyCode = currentLayout.keyMap.value(keyCode, 0);
+    if (isNativeVirtualKey && keyCode == 29) {
+        mappedKeyCode = currentLayout.keyMap.value(Qt::Key_Muhenkan, 0);
+        qCDebug(log_keyboard) << "Muhenkan key detected:" << keyCode + "isKeyDown:" + isKeyDown;
+    } else if (isNativeVirtualKey && keyCode == 28) {
+        mappedKeyCode = currentLayout.keyMap.value(Qt::Key_Henkan, 0);
+        qCDebug(log_keyboard) << "Henkan key detected:" << keyCode + "isKeyDown:" + isKeyDown;
+    } else if (isNativeVirtualKey && (keyCode == 244 || keyCode == 243)){
+        // mappedKeyCode = currentLayout.keyMap.value(Qt::Key_Zenkaku_Hankaku, 0);
+        qCDebug(log_keyboard) << "ZenkakuHankaku key detected:" << keyCode + "isKeyDown:" + isKeyDown;
+    } else {
+        mappedKeyCode = currentLayout.keyMap.value(keyCode, 0);
+    }
+
     if (mappedKeyCode == 0) {
         uint32_t unicodeValue = keyCode;
         qDebug() << "Unicode key detected:" << QString::number(unicodeValue, 16);
@@ -131,7 +145,7 @@ void KeyboardManager::handleKeyboardAction(int keyCode, int modifiers, bool isKe
     qCDebug(log_keyboard) << "Current layout name:" << currentLayout.name;
     qCDebug(log_keyboard) << "Layout has" << currentLayout.keyMap.size() << "mappings";
 
-    if(isModiferKeys(keyCode)){
+    if(!isNativeVirtualKey && isModiferKeys(keyCode)){
         // Distingush the left or right modifiers, the modifiers is a native event
         // And the keyMap uses right modifer by default
         if( modifiers == 1537){ // left shift
@@ -147,7 +161,7 @@ void KeyboardManager::handleKeyboardAction(int keyCode, int modifiers, bool isKe
             mappedKeyCode = 0xE6;
             currentModifiers |= 0x05;
         }
-    }else if(isKeypadKeys(keyCode, modifiers)){
+    }else if(!isNativeVirtualKey && isKeypadKeys(keyCode, modifiers)){
         if (keyCode == Qt::Key_NumLock) {
             mappedKeyCode = 0x53;
         }
@@ -306,9 +320,9 @@ void KeyboardManager::handlePastingCharacters(const QString& text, const QMap<ui
         if (needShift) modifiers |= Qt::ShiftModifier;
         if (needAltGr) modifiers |= Qt::GroupSwitchModifier;
         qCDebug(log_keyboard) << "Pasting character: " << ch << " with key: 0x" << QString::number(key, 16);
-        handleKeyboardAction(key, modifiers, true);
+        handleKeyboardAction(key, modifiers, true, false);
         QThread::msleep(2);
-        handleKeyboardAction(key, modifiers, false);
+        handleKeyboardAction(key, modifiers, false, false);
         index++;
     });
     timer->start(3);
@@ -374,7 +388,7 @@ void KeyboardManager::sendCtrlAltDel() {
 }
 
 void KeyboardManager::sendKey(int keyCode, int modifiers, bool isKeyDown) {
-    handleKeyboardAction(keyCode, modifiers, isKeyDown);
+    handleKeyboardAction(keyCode, modifiers, isKeyDown, false);
 }
 
 void KeyboardManager::getKeyboardLayout() {
