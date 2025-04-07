@@ -67,30 +67,31 @@ qt_add_executable(openterfaceQT WIN32 MACOSX_BUNDLE
     target/mouseeventdto.cpp target/mouseeventdto.h
     video/videohid.cpp video/videohid.h
     ui/TaskManager.cpp ui/TaskManager.h
-    ui/audiopage.cpp ui/audiopage.h
-    ui/cameraajust.cpp ui/cameraajust.h
-    ui/envdialog.cpp ui/envdialog.h ui/envdialog.ui
-    ui/fpsspinbox.cpp ui/fpsspinbox.h
     ui/globalsetting.cpp ui/globalsetting.h
-    ui/hardwarepage.cpp ui/hardwarepage.h
-    ui/helppane.cpp ui/helppane.h
+    ui/help/helppane.cpp ui/help/helppane.h
     ui/inputhandler.cpp ui/inputhandler.h
     ui/loghandler.cpp ui/loghandler.h
-    ui/logpage.cpp ui/logpage.h
     ui/mainwindow.cpp ui/mainwindow.h ui/mainwindow.ui
-    ui/metadatadialog.cpp ui/metadatadialog.h
-    ui/scripttool.cpp ui/scripttool.h
-    ui/serialportdebugdialog.cpp ui/serialportdebugdialog.h
-    ui/settingdialog.cpp ui/settingdialog.h ui/settingdialog.ui
-    ui/statusbarmanager.cpp ui/statusbarmanager.h
+    ui/advance/scripttool.cpp ui/advance/scripttool.h
+    ui/advance/serialportdebugdialog.cpp ui/advance/serialportdebugdialog.h
+    ui/advance/envdialog.cpp ui/advance/envdialog.h ui/advance/envdialog.ui
+    ui/statusbar/statusbarmanager.cpp ui/statusbar/statusbarmanager.h
+    ui/help/versioninfomanager.cpp ui/help/versioninfomanager.h
     ui/statusevents.h
-    ui/statuswidget.cpp ui/statuswidget.h
-    ui/toggleswitch.cpp ui/toggleswitch.h
-    ui/toolbarmanager.cpp ui/toolbarmanager.h
-    ui/versioninfomanager.cpp ui/versioninfomanager.h
-    ui/videopage.cpp ui/videopage.h
+    ui/statusbar/statuswidget.cpp ui/statusbar/statuswidget.h
+    ui/toolbar/toggleswitch.cpp ui/toolbar/toggleswitch.h
+    ui/toolbar/toolbarmanager.cpp ui/toolbar/toolbarmanager.h
+    ui/preferences/cameraadjust.cpp ui/preferences/cameraadjust.h
+    ui/preferences/fpsspinbox.cpp ui/preferences/fpsspinbox.h
+    ui/preferences/settingdialog.cpp ui/preferences/settingdialog.h ui/preferences/settingdialog.ui
+    ui/preferences/logpage.cpp ui/preferences/logpage.h
+    ui/preferences/videopage.cpp ui/preferences/videopage.h
+    ui/preferences/audiopage.cpp ui/preferences/audiopage.h
+    ui/preferences/targetcontrolpage.cpp ui/preferences/targetcontrolpage.h
     ui/videopane.cpp ui/videopane.h
-    ui/firmwareupdatedialog.cpp ui/firmwareupdatedialog.h
+    ui/languagemanager.cpp ui/languagemanager.h
+    ui/screensavermanager.cpp ui/screensavermanager.h
+    ui/advance/firmwareupdatedialog.cpp ui/advance/firmwareupdatedialog.h
     video/firmwarewriter.cpp video/firmwarewriter.h
     video/ms2109.h
 )
@@ -104,6 +105,7 @@ target_link_libraries(openterfaceQT PRIVATE
     Qt::Network
     Qt::SerialPort
     Qt::Svg
+    Qt::DBus
     ${FFMPEG_LIBRARIES}  # Link against FFmpeg libraries
     ${EXPAT_LIBRARIES}
     ${FREETYPE_LIBRARIES}
@@ -159,7 +161,7 @@ set(keyboard_layouts_resource_files
     "config/keyboards/qwerty_us.json"
     "config/keyboards/qwertz_de.json"
 )
-
+ 
 qt_add_resources(openterfaceQT "keyboard_layouts"
     PREFIX
         "/config/keyboards"
@@ -167,6 +169,24 @@ qt_add_resources(openterfaceQT "keyboard_layouts"
         "config/keyboards"
     FILES
         ${keyboard_layouts_resource_files}
+)
+
+set(languages_resources_files
+    "config/languages/openterface_da.qm"
+    "config/languages/openterface_de.qm"
+    "config/languages/openterface_en.qm"
+    "config/languages/openterface_fr.qm"
+    "config/languages/openterface_ja.qm"
+    "config/languages/openterface_se.qm"
+)
+
+qt_add_resources(openterfaceQT "languages"
+    PREFIX
+        "/config/languages"
+    BASE
+        "config/languages"
+    FILES
+        ${languages_resources_files}
 )
 
 set(qmake_immediate_resource_files

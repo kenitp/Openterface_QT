@@ -30,22 +30,23 @@
 
 // Then include your custom headers
 #include "../host/audiomanager.h"
-#include "ui/statuswidget.h"
 #include "ui/statusevents.h"
 #include "ui/videopane.h"
-#include "ui/toggleswitch.h"
-#include "toolbarmanager.h"
-#include "ui/serialportdebugdialog.h"
-#include "ui/settingdialog.h"
-#include "host/cameramanager.h"
-#include "ui/versioninfomanager.h"
-#include "statusbarmanager.h"
-#include "host/usbcontrol.h"
-#include "ui/cameraajust.h"
-#include "ui/scripttool.h"
+#include "ui/toolbar/toggleswitch.h"
+#include "ui/preferences/settingdialog.h"
+#include "ui/advance/serialportdebugdialog.h"
+#include "ui/advance/scripttool.h"
+#include "ui/help/versioninfomanager.h"
+#include "ui/toolbar/toolbarmanager.h"
 #include "ui/TaskManager.h"
-#include "../scripts/semanticAnalyzer.h"
-#include "../scripts/AST.h"
+#include "ui/languagemanager.h"
+#include "ui/statusbar/statusbarmanager.h"
+#include "host/usbcontrol.h"
+#include "host/cameramanager.h"
+#include "scripts/semanticAnalyzer.h"
+#include "scripts/AST.h"
+#include "ui/languagemanager.h"
+#include "ui/screensavermanager.h"
 
 
 #ifdef ONLINE_VERSION
@@ -103,7 +104,7 @@ class MainWindow : public QMainWindow, public StatusEventCallback
     Q_OBJECT
 
 public:
-    MainWindow();
+    MainWindow(LanguageManager *languageManager, QWidget *parent = nullptr);
     void calculate_video_position();
     void stop();
     // Add this line to declare the destructor
@@ -170,8 +171,6 @@ private slots:
 
     void onSwitchableUsbToggle(const bool isToHost) override;
 
-    void onResolutionChange(const int& width, const int& height, const float& fps) override;
-
     void onTargetUsbConnected(const bool isConnected) override;
     
     bool CheckDeviceAccess(uint16_t vid, uint16_t pid);
@@ -188,6 +187,9 @@ protected:
     void onActionRelativeTriggered();
     void onActionAbsoluteTriggered();
 
+    void onActionMouseAutoHideTriggered();
+    void onActionMouseAlwaysShowTriggered();
+
     void onActionResetHIDTriggered();
     void onActionResetSerialPortTriggered();
     void onActionFactoryResetHIDTriggered();
@@ -200,7 +202,7 @@ protected:
 
     void queryResolutions();
 
-    void updateResolutions(int input_width, int input_height, float input_fps, int capture_width, int capture_height, int capture_fps);
+    void onResolutionChange(const int& width, const int& height, const float& fps, const float& pixelClk);
 
     void onButtonClicked();
 
@@ -223,8 +225,9 @@ private slots:
     void checkMousePosition();
 
 private slots:
-    void onVideoSettingsChanged(int width, int height);
-    void onResolutionsUpdated(int input_width, int input_height, float input_fps, int capture_width, int capture_height, int capture_fps);
+    void onVideoSettingsChanged();
+    void onResolutionsUpdated(int input_width, int input_height, float input_fps, int capture_width, int capture_height, int capture_fps, float pixelClk);
+    void onInputResolutionChanged(int old_input_width, int old_input_height, int new_input_width, int new_input_height);
 
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -245,7 +248,10 @@ private:
     QToolBar *toolbar;
     ToolbarManager *toolbarManager; // Moved up in the declaration orde r
     
-
+    LanguageManager *m_languageManager;
+    void updateUI();
+    void setupLanguageMenu();
+    void onLanguageSelected(QAction *action);
 
     QMediaDevices m_source;
     QScopedPointer<QImageCapture> m_imageCapture;
@@ -302,6 +308,8 @@ private:
 
     void animateVideoPane();
 
+    void doResize();
+
     void centerVideoPane();
     void checkInitSize();
     void fullScreen();
@@ -309,6 +317,7 @@ private:
     bool fullScreenState = false;
     Qt::WindowStates oldWindowState;
     ScriptTool *scriptTool;
+    ScreenSaverManager *m_screenSaverManager;
 #ifdef ONLINE_VERSION
     void startServer();
     TcpServer *tcpServer;

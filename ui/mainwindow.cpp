@@ -22,24 +22,22 @@
 
 #include "mainwindow.h"
 #include "global.h"
-#include "settingdialog.h"
 #include "ui_mainwindow.h"
 #include "globalsetting.h"
-#include "statusbarmanager.h"
+#include "ui/statusbar/statusbarmanager.h"
 #include "host/HostManager.h"
 #include "host/cameramanager.h"
 #include "serial/SerialPortManager.h"
 #include "loghandler.h"
-#include "ui/settingdialog.h"
-#include "ui/helppane.h"
-#include "ui/serialportdebugdialog.h"
+#include "ui/preferences/settingdialog.h"
+#include "ui/help/helppane.h"
 #include "ui/videopane.h"
 #include "video/videohid.h"
-#include "ui/versioninfomanager.h"
-#include "ui/cameraajust.h"
+#include "ui/help/versioninfomanager.h"
 #include "ui/TaskManager.h"
-#include "ui/firmwareupdatedialog.h"
-#include "envdialog.h"
+#include "ui/advance/serialportdebugdialog.h"
+#include "ui/advance/firmwareupdatedialog.h"
+#include "ui/advance/envdialog.h"
 
 #include <QCameraDevice>
 #include <QMediaDevices>
@@ -114,7 +112,7 @@ QPixmap recolorSvg(const QString &svgPath, const QColor &color, const QSize &siz
     return pixmap;
 }
 
-MainWindow::MainWindow() :  ui(new Ui::MainWindow),
+MainWindow::MainWindow(LanguageManager *languageManager, QWidget *parent) :  ui(new Ui::MainWindow),
                             m_audioManager(new AudioManager(this)),
                             videoPane(new VideoPane(this)),
                             scrollArea(new QScrollArea(this)),
@@ -122,9 +120,12 @@ MainWindow::MainWindow() :  ui(new Ui::MainWindow),
                             toolbarManager(new ToolbarManager(this)),
                             toggleSwitch(new ToggleSwitch(this)),
                             m_cameraManager(new CameraManager(this)),
-                            m_versionInfoManager(new VersionInfoManager(this))
+                            m_versionInfoManager(new VersionInfoManager(this)),
+                            m_languageManager(languageManager),
+                            m_screenSaverManager(new ScreenSaverManager(this))
                             // cameraAdjust(new CameraAdjust(this))
 {
+    Q_UNUSED(parent);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 
@@ -134,6 +135,8 @@ MainWindow::MainWindow() :  ui(new Ui::MainWindow),
     
 
     initializeKeyboardLayouts();
+
+    GlobalVar::instance().setMouseAutoHide(GlobalSetting::instance().getMouseAutoHideEnable());
 
     m_statusBarManager = new StatusBarManager(ui->statusbar, this);
     taskmanager = TaskManager::instance();
@@ -173,6 +176,9 @@ MainWindow::MainWindow() :  ui(new Ui::MainWindow),
     qCDebug(log_ui_mainwindow) << "Observe Relative/Absolute toggle...";
     connect(ui->actionRelative, &QAction::triggered, this, &MainWindow::onActionRelativeTriggered);
     connect(ui->actionAbsolute, &QAction::triggered, this, &MainWindow::onActionAbsoluteTriggered);
+
+    connect(ui->actionMouseAutoHide, &QAction::triggered, this, &MainWindow::onActionMouseAutoHideTriggered);
+    connect(ui->actionMouseAlwaysShow, &QAction::triggered, this, &MainWindow::onActionMouseAlwaysShowTriggered);
 
     qCDebug(log_ui_mainwindow) << "Observe reset HID triggerd...";
     connect(ui->actionResetHID, &QAction::triggered, this, &MainWindow::onActionResetHIDTriggered);
@@ -217,6 +223,8 @@ MainWindow::MainWindow() :  ui(new Ui::MainWindow),
     connect(m_cameraManager, &CameraManager::cameraError, this, &MainWindow::displayCameraError);
     connect(m_cameraManager, &CameraManager::imageCaptured, this, &MainWindow::processCapturedImage);                                         
     connect(m_cameraManager, &CameraManager::resolutionsUpdated, this, &MainWindow::onResolutionsUpdated);
+    connect(&VideoHid::getInstance(), &VideoHid::inputResolutionChanged, this, &MainWindow::onInputResolutionChanged);
+    connect(&VideoHid::getInstance(), &VideoHid::resolutionChangeUpdate, this, &MainWindow::onResolutionChange);
 
     #ifdef ONLINE_VERSION
         qCDebug(log_ui_mainwindow) << "Test actionTCPServer true...";
@@ -292,6 +300,9 @@ MainWindow::MainWindow() :  ui(new Ui::MainWindow),
 
     connect(ui->keyboardLayoutComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onKeyboardLayoutCombobox_Changed(int)));
 
+
+    connect(m_languageManager, &LanguageManager::languageChanged, this, &MainWindow::updateUI);
+    setupLanguageMenu();
     // fullScreen();
     // qCDebug(log_ui_mainwindow) << "full finished";
     
@@ -307,6 +318,53 @@ MainWindow::MainWindow() :  ui(new Ui::MainWindow),
         connect(this, &MainWindow::emitTCPCommandStatus, tcpServer, &TcpServer::recvTCPCommandStatus);
     }
 #endif
+
+void MainWindow::updateUI() {
+    ui->retranslateUi(this); // Update the UI elements
+    // this->menuBar()->clear();
+    setupLanguageMenu();
+}
+
+void MainWindow::setupLanguageMenu() {
+    // Clear existing language actions
+    ui->menuLanguages->clear();
+    QStringList languages = m_languageManager->availableLanguages();
+    for (const QString &lang : languages) {
+       qCDebug(log_ui_mainwindow) << "Available language: " << lang; 
+    }
+    if (languages.isEmpty()) {
+        languages << "en" << "fr" << "de" << "da" << "ja" << "se";
+    }
+
+    QActionGroup *languageGroup = new QActionGroup(this);
+    languageGroup->setExclusive(true);
+
+    QMap<QString, QString> languageNames = {
+        {"en", "English"},
+        {"fr", "Français"},
+        {"de", "German"},
+        {"da", "Danish"},
+        {"ja", "Japanese"},
+        {"se", "Swedish"}
+    };
+    for (const QString &lang : languages) {
+        QString displayName = languageNames.value(lang, lang);
+        QAction *action = new QAction(displayName, this);
+        action->setCheckable(true);
+        action->setData(lang);
+        if (lang == m_languageManager->currentLanguage()) {
+            action->setChecked(true);
+        }
+        ui->menuLanguages->addAction(action);
+        languageGroup->addAction(action);
+    }
+    connect(languageGroup, &QActionGroup::triggered, this, &MainWindow::onLanguageSelected);
+}
+
+void MainWindow::onLanguageSelected(QAction *action) {
+    QString language = action->data().toString();
+    m_languageManager->switchLanguage(language);
+}
 
 bool MainWindow::isFullScreenMode() {
     // return fullScreenState;
@@ -344,14 +402,14 @@ void MainWindow::fullScreen(){
 }
 
 void MainWindow::setTooltip(){
-    ui->ZoomInButton->setToolTip("Zoom in");
-    ui->ZoomOutButton->setToolTip("Zoom out");
-    ui->ZoomReductionButton->setToolTip("Restore original size");
-    ui->virtualKeyboardButton->setToolTip("Function key and composite key");
-    ui->pasteButton->setToolTip("Paste text to target");
-    ui->screensaverButton->setToolTip("Mouse dance");
-    ui->captureButton->setToolTip("Full screen capture");
-    ui->fullScreenButton->setToolTip("Full screen mode");
+    ui->ZoomInButton->setToolTip(tr("Zoom in"));
+    ui->ZoomOutButton->setToolTip(tr("Zoom out"));
+    ui->ZoomReductionButton->setToolTip(tr("Restore original size"));
+    ui->virtualKeyboardButton->setToolTip(tr("Function key and composite key"));
+    ui->pasteButton->setToolTip(tr("Paste text to target"));
+    ui->screensaverButton->setToolTip(tr("Mouse dance"));
+    ui->captureButton->setToolTip(tr("Full screen capture"));
+    ui->fullScreenButton->setToolTip(tr("Full screen mode"));
 }
 
 void MainWindow::onZoomIn()
@@ -457,7 +515,15 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 
     qCDebug(log_ui_mainwindow) << "Handle window resize event.";
     QMainWindow::resizeEvent(event);  // Call base class implementation
+    
+    doResize();
 
+    // Update global variables with the new window size
+    isResizing = false;
+
+} // end resize event function
+
+void MainWindow::doResize(){
     // Check if the window is maximized
     if (this->windowState() & Qt::WindowMaximized) {
         // Handle maximized state
@@ -470,8 +536,14 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
     }
 
     // Define the desired aspect ratio
+    if(GlobalVar::instance().getCaptureWidth() && GlobalVar::instance().getCaptureHeight()){
+        video_width = GlobalVar::instance().getCaptureWidth();
+        video_height = GlobalVar::instance().getCaptureHeight();
+    }
     qreal aspect_ratio = static_cast<qreal>(video_width) / video_height;
-
+    if(GlobalVar::instance().getInputAspectRatio()){
+        aspect_ratio = GlobalVar::instance().getInputAspectRatio();
+    }
 
     QScreen *currentScreen = this->screen();
     QRect availableGeometry = currentScreen->availableGeometry();
@@ -529,6 +601,7 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
         videoPane->setMinimumSize(videoWidth, videoHeight);
         videoPane->resize(videoWidth, videoHeight);
 
+
         // Move the videoPane to the center horizontally
         
         // Resize the scrollArea to match the videoPane size
@@ -550,19 +623,15 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
         resize(currentWidth, new_height);
 
         int contentHeight = this->height() - statusBarHeight - menuBarHeight;
+        qCDebug(log_ui_mainwindow) << "this height: "<< this->height();
         videoPane->setMinimumSize(this->width(), contentHeight);
         videoPane->resize(this->width(), contentHeight);
+        qCDebug(log_ui_mainwindow) << "video height: "<< contentHeight <<"video width: " << this->width();
         scrollArea->resize(this->width(), contentHeight);
         GlobalVar::instance().setWinWidth(this->width());
         GlobalVar::instance().setWinHeight(this->height());
     }
-
-    // Update global variables with the new window size
-    
-
-    isResizing = false;
-} // end resize event function
-
+}
 
 void MainWindow::moveEvent(QMoveEvent *event) {
     // Get the old and new positions
@@ -582,8 +651,10 @@ void MainWindow::moveEvent(QMoveEvent *event) {
 }
 
 void MainWindow::calculate_video_position(){
-
     double aspect_ratio = static_cast<double>(video_width) / video_height;
+    if(GlobalVar::instance().getInputAspectRatio()){
+        aspect_ratio = GlobalVar::instance().getInputAspectRatio();
+    } 
 
     int scaled_window_width, scaled_window_height;
     int titleBarHeight = this->frameGeometry().height() - this->geometry().height();
@@ -667,6 +738,18 @@ void MainWindow::onActionAbsoluteTriggered()
     GlobalVar::instance().setAbsoluteMouseMode(true);
 }
 
+void MainWindow::onActionMouseAutoHideTriggered()
+{
+    GlobalVar::instance().setMouseAutoHide(true);
+    GlobalSetting::instance().setMouseAutoHideEnable(true);
+}
+
+void MainWindow::onActionMouseAlwaysShowTriggered()
+{
+    GlobalVar::instance().setMouseAutoHide(false);
+    GlobalSetting::instance().setMouseAutoHideEnable(false);
+}
+
 void MainWindow::onActionResetHIDTriggered()
 {
     QMessageBox::StandardButton reply;
@@ -739,11 +822,11 @@ void MainWindow::onToggleSwitchStateChanged(int state)
     }
 }
 
-void MainWindow::onResolutionChange(const int& width, const int& height, const float& fps)
+void MainWindow::onResolutionChange(const int& width, const int& height, const float& fps, const float& pixelClk)
 {
     GlobalVar::instance().setInputWidth(width);
     GlobalVar::instance().setInputHeight(height);
-    m_statusBarManager->setInputResolution(width, height, fps);
+    m_statusBarManager->setInputResolution(width, height, fps, pixelClk);
 }
 
 void MainWindow::onTargetUsbConnected(const bool isConnected)
@@ -850,9 +933,11 @@ void MainWindow::configureSettings() {
     if (!settingDialog){
         qDebug() << "Creating settings dialog";
         settingDialog = new SettingDialog(m_cameraManager, this);
-        HardwarePage* hardwarePage = settingDialog->getHardwarePage();
+
         VideoPage* videoPage = settingDialog->getVideoPage();
-        connect(hardwarePage, &HardwarePage::cameraSettingsApplied, m_cameraManager, &CameraManager::loadCameraSettingAndSetCamera);
+        LogPage* logPage = settingDialog->getLogPage();
+        connect(logPage, &LogPage::ScreenSaverInhibitedChanged, m_screenSaverManager, &ScreenSaverManager::setScreenSaverInhibited);
+        connect(videoPage, &VideoPage::cameraSettingsApplied, m_cameraManager, &CameraManager::loadCameraSettingAndSetCamera);
         // connect(settingDialog, &SettingDialog::cameraSettingsApplied, m_cameraManager, &CameraManager::loadCameraSettingAndSetCamera);
         connect(videoPage, &VideoPage::videoSettingsChanged, this, &MainWindow::onVideoSettingsChanged);
         // connect the finished signal to the set the dialog pointer to nullptr
@@ -1189,26 +1274,59 @@ void MainWindow::checkMousePosition()
     }
 }
 
-void MainWindow::onVideoSettingsChanged(int width, int height) {
-    int newWidth = width + 1; 
-    int newHeight = height + 1;
+void MainWindow::onVideoSettingsChanged() {
+    int inputWidth = GlobalVar::instance().getInputWidth();
+    int inputHeight = GlobalVar::instance().getInputHeight();
+    int captureWidth = GlobalVar::instance().getCaptureWidth();
+    int captureHeight = GlobalVar::instance().getCaptureHeight();
 
-    // Resize the window
-    resize(newWidth, newHeight);
+    // Calculate aspect ratios
+    double inputAspectRatio = static_cast<double>(inputWidth) / inputHeight;
+    double captureAspectRatio = static_cast<double>(captureWidth) / captureHeight;
+
+    // Resize the window based on aspect ratios
+    if (inputAspectRatio != captureAspectRatio) {
+        // Adjust the window size to hide black bars
+        int newWidth = static_cast<int>(captureHeight * inputAspectRatio);
+        qDebug() << "Resize to " << newWidth << captureHeight;
+        resize(newWidth, captureHeight);
+    } else {
+        // If aspect ratios are the same, just resize normally
+        resize(captureWidth + 1, captureHeight + 1);
+    }
 
     // Optionally, you might want to center the window on the screen
     QScreen *screen = this->screen();
     QRect availableGeometry = screen->availableGeometry();
-    // QRect screenGeometry = QApplication::primaryScreen()->geometry();
-    int x = (availableGeometry.width() - newWidth) / 2;
-    int y = (availableGeometry.height() - newHeight) / 2;
+    int x = (availableGeometry.width() - captureWidth) / 2;
+    int y = (availableGeometry.height() - captureHeight) / 2;
     move(x, y);
 }
 
-void MainWindow::onResolutionsUpdated(int input_width, int input_height, float input_fps, int capture_width, int capture_height, int capture_fps)
+void MainWindow::onResolutionsUpdated(int input_width, int input_height, float input_fps, int capture_width, int capture_height, int capture_fps, float pixelClk)
 {
-    m_statusBarManager->setInputResolution(input_width, input_height, input_fps);
+    m_statusBarManager->setInputResolution(input_width, input_height, input_fps, pixelClk);
     m_statusBarManager->setCaptureResolution(capture_width, capture_height, capture_fps);
+
+    video_height = GlobalVar::instance().getCaptureHeight();
+    video_width = GlobalVar::instance().getCaptureWidth();
+}
+
+void MainWindow::onInputResolutionChanged(int old_input_width, int old_input_height, int new_input_width, int new_input_height)
+{
+    doResize();
+
+    // Calculate the maximum available content height with safety checks
+    int contentHeight = this->height() - ui->statusbar->height() - ui->menubar->height();
+
+    qDebug() << "contentHeight: " << contentHeight;
+    
+    // Set the videoPane to use the full available width and height
+    videoPane->setMinimumSize(videoPane->width(), contentHeight);
+    videoPane->resize(videoPane->width(), contentHeight);
+    
+    // Ensure scrollArea is also resized appropriately
+    scrollArea->resize(videoPane->width(), contentHeight);
 }
 
 void MainWindow::showScriptTool()
@@ -1283,6 +1401,7 @@ bool MainWindow::CheckDeviceAccess(uint16_t vid, uint16_t pid) {
 }
 
 void MainWindow::onToolbarVisibilityChanged(bool visible) {
+    Q_UNUSED(visible);
     // Prevent repaints during animation
     setUpdatesEnabled(false);
     
@@ -1317,7 +1436,7 @@ void MainWindow::animateVideoPane() {
 
     // Get toolbar visibility and window state
     bool isToolbarVisible = toolbarManager->getToolbar()->isVisible();
-    bool isMaximized = windowState() & Qt::WindowMaximized;
+    // bool isMaximized = windowState() & Qt::WindowMaximized;
 
     // Calculate content height based on toolbar visibility
     int contentHeight;
@@ -1382,6 +1501,7 @@ void MainWindow::changeKeyboardLayout(const QString& layout) {
 }
 
 void MainWindow::onKeyboardLayoutCombobox_Changed(int index){
+    Q_UNUSED(index);
     QString currentLayout = ui->keyboardLayoutComboBox->currentText();
     changeKeyboardLayout(currentLayout);
 }
@@ -1418,32 +1538,24 @@ void MainWindow::showEnvironmentSetupDialog() {
 }
 
 void MainWindow::updateFirmware() {
-    // Check if it's lastest firmware
+    // Check if it's latest firmware
     if (VideoHid::getInstance().isLatestFirmware()) {
-        QMessageBox::information(this, "Firmware Update", "The firmware is up to date.");
+        std::string currentFirmwareVersion = VideoHid::getInstance().getFirmwareVersion();
+        QMessageBox::information(this, tr("Firmware Update"), 
+            tr("The firmware is up to date.\nCurrent version: ") + 
+            QString::fromStdString(currentFirmwareVersion));
         return;
     }
 
 
     std::string currentFirmwareVersion = VideoHid::getInstance().getFirmwareVersion();
     std::string latestFirmwareVersion = VideoHid::getInstance().getLatestFirmwareVersion();
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning(this, "Firmware Update Confirmation",
-                                "Current firmware version: " + QString::fromStdString(currentFirmwareVersion) + "\n"
-                                "Latest firmware version: " + QString::fromStdString(latestFirmwareVersion) + "\n\n"
-                               "The update process will:\n"
-                               "1. Stop all video and USB operations\n"
-                               "2. Install new firmware\n"
-                               "3. Close the application automatically\n\n"
-                               "Important:\n"
-                               "• Use a high-quality USB cable for host connection\n"
-                               "• Disconnect the HDMI cable\n"
-                               "• Do not interrupt power during update\n"
-                               "• Restart application after completion\n\n"
-                               "Do you want to proceed with the update?",
-                               QMessageBox::Ok | QMessageBox::Cancel);
+    
+    // Create and show the confirmation dialog
+    FirmwareUpdateConfirmDialog confirmDialog(this);
+    bool proceed = confirmDialog.showConfirmDialog(currentFirmwareVersion, latestFirmwareVersion);
 
-    if (reply == QMessageBox::Ok) {
+    if (proceed) {
         // Stop video and HID operations before firmware update
         VideoHid::getInstance().stop();
         SerialPortManager::getInstance().stop();
@@ -1455,5 +1567,5 @@ void MainWindow::updateFirmware() {
         updateDialog->startUpdate();
         // The application will be closed by the dialog if the update is successful
         updateDialog->deleteLater();
-    } 
+    }
 }

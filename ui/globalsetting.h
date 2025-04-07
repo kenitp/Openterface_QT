@@ -72,6 +72,21 @@ public:
     void setKeyboardLayout(QString keyboardLayout);
 
     void getKeyboardLayout(QString &keyboardLayout);
+
+    void setMouseAutoHideEnable(bool enable);
+
+    bool getMouseAutoHideEnable();
+
+    void setLangeuage(QString language);
+
+    void getLanguage(QString &language);
+
+    void setOperatingMode(int mode);
+    int getOperatingMode() const;
+
+    void setScreenSaverInhibited(bool inhibit);
+    bool getScreenSaverInhibited() const;
+
 private:
     QSettings m_settings;
 };

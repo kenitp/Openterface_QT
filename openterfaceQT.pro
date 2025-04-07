@@ -7,41 +7,38 @@
 TARGET = openterfaceQT
 TEMPLATE = app
 
-QT       += core gui multimedia multimediawidgets serialport concurrent svg network
-QT       += core gui multimedia multimediawidgets serialport concurrent svg network
-
+QT       += core gui multimedia multimediawidgets serialport concurrent svg network dbus
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 SOURCES += main.cpp \
     target/mouseeventdto.cpp \
     host/audiomanager.cpp \
     host/cameramanager.cpp \
-    ui/fpsspinbox.cpp \
-    ui/serialportdebugdialog.cpp \
-    ui/settingdialog.cpp \
-    ui/statuswidget.cpp \
+    ui/statusbar/statuswidget.cpp \
     video/videohid.cpp \
     video/firmwarewriter.cpp \
-    ui/helppane.cpp \
+    ui/help/helppane.cpp \
     ui/mainwindow.cpp \
-    ui/metadatadialog.cpp \
     ui/videopane.cpp \
     ui/globalsetting.cpp \
-    ui/toolbarmanager.cpp \
-    ui/toggleswitch.cpp \
+    ui/toolbar/toolbarmanager.cpp \
+    ui/toolbar/toggleswitch.cpp \
     ui/loghandler.cpp \
-    ui/inputhandler.cpp \
-    ui/versioninfomanager.cpp \    
-    ui/statusbarmanager.cpp \
-    ui/logpage.cpp \
-    ui/hardwarepage.cpp \
-    ui/videopage.cpp \
-    ui/audiopage.cpp \
-    ui/cameraajust.cpp \
-    ui/scripttool.cpp \
+    ui/inputhandler.cpp \ 
+    ui/preferences/settingdialog.cpp \
+    ui/preferences/logpage.cpp \
+    ui/preferences/targetcontrolpage.cpp \
+    ui/preferences/videopage.cpp \
+    ui/preferences/audiopage.cpp \
     ui/TaskManager.cpp \
-    ui/envdialog.cpp \
-    ui/firmwareupdatedialog.cpp \
+    ui/statusbar/statusbarmanager.cpp \
+    ui/preferences/fpsspinbox.cpp \
+    ui/preferences/cameraadjust.cpp \
+    ui/advance/serialportdebugdialog.cpp \
+    ui/advance/scripttool.cpp \
+    ui/help/versioninfomanager.cpp \ 
+    ui/advance/envdialog.cpp \
+    ui/advance/firmwareupdatedialog.cpp \
     host/HostManager.cpp \
     serial/SerialPortManager.cpp \
     target/KeyboardManager.cpp \
@@ -55,7 +52,9 @@ SOURCES += main.cpp \
     target/KeyboardLayouts.cpp \
     regex/RegularExpression.cpp \
     server/tcpServer.cpp \
-    scripts/scriptEditor.cpp 
+    scripts/scriptEditor.cpp \
+    ui/languagemanager.cpp \
+    ui/screensavermanager.cpp
 
 
 HEADERS  += \
@@ -63,33 +62,32 @@ HEADERS  += \
     target/mouseeventdto.h \
     host/audiomanager.h \
     host/cameramanager.h \
-    ui/fpsspinbox.h \
-    ui/serialportdebugdialog.h \
-    ui/settingdialog.h \
-    ui/statuswidget.h \
+    ui/statusbar/statuswidget.h \
     video/videohid.h \
     video/firmwarewriter.h \
-    ui/helppane.h \
+    ui/help/helppane.h \
     ui/mainwindow.h \
-    ui/metadatadialog.h \
     ui/videopane.h \
     ui/globalsetting.h \
     ui/statusevents.h \
-    ui/toolbarmanager.h \
-    ui/toggleswitch.h \
+    ui/toolbar/toolbarmanager.h \
+    ui/toolbar/toggleswitch.h \
     ui/loghandler.h \
     ui/inputhandler.h \
-    ui/versioninfomanager.h \
-    ui/statusbarmanager.h \
-    ui/logpage.h \
-    ui/hardwarepage.h \
-    ui/videopage.h   \
-    ui/audiopage.h \
-    ui/cameraajust.h \
-    ui/scripttool.h \
+    ui/statusbar/statusbarmanager.h \
+    ui/help/versioninfomanager.h \
+    ui/advance/serialportdebugdialog.h \
+    ui/advance/scripttool.h \
+    ui/advance/envdialog.h \
+    ui/advance/firmwareupdatedialog.h \
+    ui/preferences/cameraadjust.h \
+    ui/preferences/fpsspinbox.h \
+    ui/preferences/settingdialog.h \
+    ui/preferences/logpage.h \
+    ui/preferences/targetcontrolpage.h \
+    ui/preferences/videopage.h   \
+    ui/preferences/audiopage.h \
     ui/TaskManager.h \
-    ui/envdialog.h \
-    ui/firmwareupdatedialog.h \
     host/HostManager.h \
     serial/ch9329.h \
     serial/SerialPortManager.h \
@@ -106,19 +104,20 @@ HEADERS  += \
     server/tcpServer.h \
     regex/RegularExpression.h \
     target/KeyboardLayouts.h \
-    scripts/scriptEditor.h
-
-
+    scripts/scriptEditor.h \
+    ui/languagemanager.h \
+    ui/screensavermanager.h
 
 FORMS    += \
     ui/mainwindow.ui \
-    ui/settingdialog.ui \
-    ui/envdialog.ui
+    ui/preferences/settingdialog.ui \
+    ui/advance/envdialog.ui
 
 RESOURCES += \
     openterfaceQT.rc \
     ui/mainwindow.qrc \
-    config/keyboards/keyboard_layouts.qrc 
+    config/keyboards/keyboard_layouts.qrc \
+    config/languages/language.qrc
 
 
 # Copy keyboard layout files to build directory
@@ -126,6 +125,10 @@ CONFIG += file_copies
 COPIES += keyboard_layouts
 keyboard_layouts.files = $$files($$PWD/config/keyboards/*.json)
 keyboard_layouts.path = $$OUT_PWD/config/keyboards
+
+COPIES += keyboard_layouts_debug
+keyboard_layouts.files = $$files($$PWD/config/keyboards/*.json)
+keyboard_layouts.path = $$OUT_PWD/debug/config/keyboards
 
 # Create directories if they don't exist
 system($$QMAKE_MKDIR $$shell_path($$PWD/config/keyboards))
@@ -162,15 +165,19 @@ RC_FILE = openterfaceQT.rc
 
 DEPENDPATH += $$PWD/''
 
-#DEFINES += ONLINE_VERSION
+DEFINES += ONLINE_VERSION
 
+TRANSLATIONS += config/languages/openterface_en.ts \
+                config/languages/openterface_fr.ts \
+                config/languages/openterface_da.ts \
+                config/languages/openterface_ja.ts \
+                config/languages/openterface_se.ts \
+                config/languages/openterface_de.ts 
+                # Add more languages here
 
-win32 {
-    CONFIG += static staticlib
-    QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++ -static-libgfortran
-    QMAKE_CXXFLAGS += -static -static-libgcc -static-libstdc++
-    QMAKE_LFLAGS += -static-libgcc -static-libstdc++ -Wl,-Bstatic
-    LIBS += -static -lpthread -static-libgcc -static-libstdc++
-    QTPLUGIN += qwindows qwindowsvistastyle
-    CONFIG -= shared dll
-}
+COPIES += translations
+translations.files = $$files($$PWD/config/languages/*.qm)
+translations.path = $$OUT_PWD/config/languages
+
+system($$QMAKE_MKDIR $$shell_path($$PWD/debug/config/languages))
+system($$QMAKE_MKDIR $$shell_path($$OUT_PWD/debug/config/languages))

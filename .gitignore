@@ -8,3 +8,5 @@ openterfaceQT.pro.user*
 build-script/drivers/*
 build-script/ffmpeg-build/*
 build-script/temp/*
+config/languages/*.qm
+.DS_Store

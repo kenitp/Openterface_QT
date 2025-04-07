@@ -85,7 +85,7 @@ KeyboardLayoutConfig KeyboardLayoutConfig::fromJsonFile(const QString& filePath)
             config.keyMap[qtKey] = scanCode;
             qCDebug(log_keyboard_layouts) << "Successfully mapped key" << keyName 
                                         << "(" << qtKey << ") to scancode 0x" + QString::number(scanCode, 16);
-        } else {
+        } else{
             qCWarning(log_keyboard_layouts) << "Failed to map key" << keyName 
                                           << "value:" << valueStr 
                                           << "ok:" << ok 
@@ -115,6 +115,42 @@ KeyboardLayoutConfig KeyboardLayoutConfig::fromJsonFile(const QString& filePath)
         qCDebug(log_keyboard_layouts) << "Mapped char" << charStr << "to QtKey" << QString::number(qtKey, 16);
     }
 
+    QJsonObject unicodeMap = json["unicode_map"].toObject();
+    qCDebug(log_keyboard_layouts) << "Loading" << unicodeMap.size() << "unicode mappings";
+    
+    for (auto it = unicodeMap.begin(); it != unicodeMap.end(); ++it) {
+        QString unicodeStr = it.key();
+        QString valueStr = it.value().toString();
+
+        uint32_t unicodeValue;
+        if (unicodeStr.startsWith("U+")) {
+            bool ok;
+            unicodeValue = unicodeStr.mid(2).toUInt(&ok, 16);
+            if (!ok) {
+                qCWarning(log_keyboard_layouts) << "Invalid Unicode key:" << unicodeStr;
+                continue;
+            }
+        } else {
+            bool ok;
+            unicodeValue = unicodeStr.toUInt(&ok);
+            if (!ok) {
+                qCWarning(log_keyboard_layouts) << "Invalid Unicode key:" << unicodeStr;
+                continue;
+            }
+        }
+
+        bool ok;
+        uint8_t scanCode = valueStr.mid(2).toInt(&ok, 16);
+        if (ok) {
+            config.unicodeMap[unicodeValue] = scanCode;
+            qCDebug(log_keyboard_layouts) << "Mapped Unicode U+" << QString::number(unicodeValue, 16) 
+                                        << "to scancode 0x" << QString::number(scanCode, 16);
+        } else {
+            qCWarning(log_keyboard_layouts) << "Failed to parse scancode for Unicode" 
+                                          << unicodeStr << ":" << valueStr;
+        }
+    }
+
     // Load shift keys
     QJsonArray shiftKeys = json["need_shift_keys"].toArray();
     for (const QJsonValue& value : shiftKeys) {
@@ -124,6 +160,20 @@ KeyboardLayoutConfig KeyboardLayoutConfig::fromJsonFile(const QString& filePath)
         } else {
             // Handle hex values for special characters
             config.needShiftKeys.append(keyStr.toInt(nullptr, 16));
+        }
+    }
+
+    if (json.contains("need_altgr_keys")) {
+        QJsonArray altGrKeys = json["need_altgr_keys"].toArray();
+        for (const QJsonValue& value : altGrKeys) {
+            QString keyStr = value.toString();
+            if (keyStr.length() == 1) {
+                config.needAltGrKeys.append(keyStr[0].unicode());
+                qCDebug(log_keyboard_layouts) << "Added AltGr key:" << keyStr;
+            } else {
+                config.needAltGrKeys.append(keyStr.toInt(nullptr, 16));
+                qCDebug(log_keyboard_layouts) << "Added AltGr key (hex):" << keyStr;
+            }
         }
     }
     
