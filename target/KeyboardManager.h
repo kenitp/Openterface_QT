@@ -45,7 +45,7 @@ class KeyboardManager: public QObject
 public:
     explicit KeyboardManager(QObject *parent = nullptr);
 
-    void handleKeyboardAction(int keyCode, int modifiers, bool isKeyDown);
+    void handleKeyboardAction(int keyCode, int modifiers, bool isKeyDown, bool isNativeVirtualKey);
     void handlePasteChar(int key, int modifiers);
 
     /*
