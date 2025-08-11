@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>1280</width>
-    <height>761</height>
-   </rect>
-  </property>
   <property name="cursor">
    <cursorShape>ArrowCursor</cursorShape>
   </property>
@@ -84,6 +76,11 @@
      <addaction name="actionMouseAutoHide"/>
      <addaction name="actionMouseAlwaysShow"/>
     </widget>
+    <widget class="QMenu" name="menuDevice">
+     <property name="title">
+      <string>Device</string>
+     </property>
+    </widget>
     <widget class="QMenu" name="menuBaudrate">
      <property name="title">
       <string>Baudrate</string>
@@ -100,6 +97,7 @@
     </widget>
     <addaction name="menuMouse_Mode"/>
     <addaction name="menuMouse_Visibility"/>
+    <addaction name="menuDevice"/>
     <addaction name="menuSwitchable_USB"/>
     <addaction name="menuBaudrate"/>
     <addaction name="separator"/>
@@ -132,8 +130,10 @@
     <addaction name="actionSerialConsole"/>
     <addaction name="actionScriptTool"/>
     <addaction name="actionTCPServer"/>
+    <addaction name="actionDeviceSelector"/>
     <addaction name="actionFirmwareManager"/>
     <addaction name="actionUpdateFirmware"/>
+    <addaction name="actionRenameDisplay"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -258,6 +258,22 @@
   <action name="actionUpdateFirmware">
    <property name="text">
     <string>Firmware Update...</string>
+   </property>
+  </action>
+  <action name="actionDeviceSelector">
+   <property name="text">
+    <string>Device Selector</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Device Selector Dialog</string>
+   </property>
+  </action>
+  <action name="actionRenameDisplay">
+   <property name="text">
+    <string>Update Display Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Update display name and serial number in EDID</string>
    </property>
   </action>
   <actiongroup name="actionGroup">
@@ -527,6 +543,18 @@
    <receiver>MainWindow</receiver>
    <slot>updateFirmware()</slot>
   </connection>
+  <connection>
+   <sender>actionDeviceSelector</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openDeviceSelector()</slot>
+  </connection>
+  <connection>
+   <sender>actionRenameDisplay</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showUpdateDisplaySettingsDialog()</slot>
+  </connection>
  </connections>
  <slots>
   <slot>record()</slot>
@@ -552,5 +580,7 @@
   <slot>showEnvironmentSetupDialog()</slot>
   <slot>showFirmwareManagerDialog()</slot>
   <slot>updateFirmware()</slot>
+  <slot>openDeviceSelector()</slot>
+  <slot>showUpdateDisplaySettingsDialog()</slot>
  </slots>
 </ui>

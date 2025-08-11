@@ -27,6 +27,7 @@
 #include <QtWidgets>
 #include <QtMultimedia>
 #include <QtMultimediaWidgets>
+#include <QDateTime>
 
 // Then include your custom headers
 #include "../host/audiomanager.h"
@@ -35,8 +36,10 @@
 #include "ui/toolbar/toggleswitch.h"
 #include "ui/preferences/settingdialog.h"
 #include "ui/advance/serialportdebugdialog.h"
+#include "ui/advance/DeviceSelectorDialog.h"
 #include "ui/advance/scripttool.h"
 #include "ui/advance/firmwaremanagerdialog.h"
+#include "ui/advance/updatedisplaysettingsdialog.h"
 #include "ui/help/versioninfomanager.h"
 #include "ui/toolbar/toolbarmanager.h"
 #include "ui/TaskManager.h"
@@ -78,7 +81,6 @@
 #include <QPalette>
 #include <QStyle>
 #include <QEvent>
-#include <QScrollArea>
 #include <libusb-1.0/libusb.h>
 #include <QMessageBox>
 
@@ -145,6 +147,7 @@ private slots:
 
     void configureSettings();
     void debugSerialPort();
+    void openDeviceSelector();
 
     void displayCameraError();
 
@@ -183,6 +186,8 @@ private slots:
     void showEnvironmentSetupDialog();
 
     void showFirmwareManagerDialog();
+
+    void showUpdateDisplaySettingsDialog();
 
     void updateFirmware(); 
 
@@ -236,7 +241,6 @@ private:
     VideoPane *videoPane;
     double systemScaleFactor;
     QColor iconColor;
-    QScrollArea *scrollArea;
 
     QStackedLayout *stackedLayout;
     QLabel *mouseLocationLabel;
@@ -249,7 +253,10 @@ private:
     
     void updateUI();
     void setupLanguageMenu();
+    void setupDeviceMenu();
+    void updateDeviceMenu();
     void onLanguageSelected(QAction *action);
+    void onDeviceSelected(QAction *action);
 
     QMediaDevices m_source;
     QScopedPointer<QImageCapture> m_imageCapture;
@@ -268,7 +275,9 @@ private:
     MetaDataDialog *m_metaDataDialog = nullptr;
     SettingDialog *settingDialog = nullptr;
     SerialPortDebugDialog *serialPortDebugDialog = nullptr;
+    DeviceSelectorDialog *deviceSelectorDialog = nullptr;
     FirmwareManagerDialog *firmwareManagerDialog = nullptr;
+    UpdateDisplaySettingsDialog *updateDisplaySettingsDialog = nullptr;
 
     QWidget *keyboardPanel = nullptr;
 
@@ -279,6 +288,11 @@ private:
 
     CameraManager *m_cameraManager;
     InputHandler *m_inputHandler;
+    
+    // Device menu management
+    QActionGroup *m_deviceMenuGroup;
+    
+    // Camera coordination functionality removed - now handled by DeviceManager
 
     void updateScrollbars();
     QPoint lastMousePos;
