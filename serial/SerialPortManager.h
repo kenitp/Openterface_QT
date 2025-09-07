@@ -31,6 +31,10 @@
 #include <QLoggingCategory>
 #include <QDateTime>
 #include <QElapsedTimer>
+#include <QMutex>
+#include <QQueue>
+#include <QWaitCondition>
+#include <atomic>
 
 #include "ch9329.h"
 
@@ -44,8 +48,10 @@ class SerialPortManager : public QObject
     Q_OBJECT
 
 public:
-    static const int ORIGINAL_BAUDRATE = 9600;
-    static const int DEFAULT_BAUDRATE = 115200;
+    static const int BAUDRATE_HIGHSPEED = 115200;
+    static const int BAUDRATE_LOWSPEED = 9600;
+    // Set the default baudrate to 9600 for better compatibility
+    static const int DEFAULT_BAUDRATE = BAUDRATE_LOWSPEED;
     static const int SERIAL_TIMER_INTERVAL = 5000;
     
     static SerialPortManager& getInstance() {
@@ -74,14 +80,20 @@ public:
     bool sendResetCommand();
     QByteArray sendSyncCommand(const QByteArray &data, bool force);
 
-    bool resetHipChip();
-    bool reconfigureHidChip();
+    bool resetHipChip(int targetBaudrate = DEFAULT_BAUDRATE);
+    bool reconfigureHidChip(int targetBaudrate = DEFAULT_BAUDRATE);
     bool factoryResetHipChipV191();
     bool factoryResetHipChip();
     void restartSwitchableUSB();
-    void setUSBconfiguration();
+    void setUSBconfiguration(int targetBaudrate = DEFAULT_BAUDRATE);
     void changeUSBDescriptor();
     bool setBaudRate(int baudrate);
+    void setUserSelectedBaudrate(int baudrate); // Set baudrate from user menu selection
+    void clearStoredBaudrate(); // Clear stored baudrate setting
+    
+    // ARM architecture detection and performance prompt
+    static bool isArmArchitecture();
+    void checkArmBaudratePerformance(int baudrate); // Check and emit signal if needed
     void setCommandDelay(int delayMs);  // set the delay
     void stop(); //stop the serial port manager
 
@@ -97,6 +109,21 @@ public:
     void connectToHotplugMonitor();
     void disconnectFromHotplugMonitor();
     
+    // Enhanced stability features
+    void enableAutoRecovery(bool enable = true);
+    void setMaxRetryAttempts(int maxRetries);
+    void setMaxConsecutiveErrors(int maxErrors);
+    bool isConnectionStable() const;
+    int getConsecutiveErrorCount() const;
+    int getConnectionRetryCount() const;
+    void forceRecovery();
+    
+    // Get current baudrate
+    int getCurrentBaudrate() const;
+    
+    // Data buffer management
+    void clearIncompleteDataBuffer();
+    
 signals:
     void dataReceived(const QByteArray &data);
     void dataSent(const QByteArray &data);
@@ -107,6 +134,8 @@ signals:
     void connectedPortChanged(const QString &portName, const int &baudrate);
     void serialPortSwitched(const QString& fromPortChain, const QString& toPortChain);
     void serialPortDeviceChanged(const QString& oldPortPath, const QString& newPortPath);
+    void armBaudratePerformanceRecommendation(int currentBaudrate); // Signal for ARM performance recommendation
+    void parameterConfigurationSuccess(); // Signal emitted when parameter configuration is successful and reset is needed
     
 private slots:
     void checkSerialPort();
@@ -139,9 +168,7 @@ private:
     void sendCommand(const QByteArray &command, bool waitForAck);
 
     QSet<QString> availablePorts;
-
-    // int baudrate = ORIGINAL_BAUDRATE;
-
+    
     QThread *serialThread;
     QTimer *serialTimer;
 
@@ -164,7 +191,46 @@ private:
     // Current serial port tracking
     QString m_currentSerialPortPath;
     QString m_currentSerialPortChain;
-
+    
+    // Enhanced stability members
+    std::atomic<bool> m_isShuttingDown = false;
+    std::atomic<int> m_connectionRetryCount = 0;
+    std::atomic<int> m_consecutiveErrors = 0;
+    QTimer* m_connectionWatchdog;
+    QTimer* m_errorRecoveryTimer;
+    QMutex m_serialPortMutex;
+    QQueue<QByteArray> m_commandQueue;
+    QMutex m_commandQueueMutex;
+    bool m_autoRecoveryEnabled = true;
+    int m_maxRetryAttempts = 5;
+    int m_maxConsecutiveErrors = 10;
+    QElapsedTimer m_lastSuccessfulCommand;
+    
+    // Error frequency tracking for auto-disconnect mechanism
+    std::atomic<int> m_errorCount = 0;
+    QElapsedTimer m_errorTrackingTimer;
+    bool m_errorHandlerDisconnected = false;
+    static const int MAX_ERRORS_PER_SECOND = 5;
+    
+    // Data buffering for incomplete packets
+    QByteArray m_incompleteDataBuffer;
+    QMutex m_bufferMutex;
+    static const int MAX_BUFFER_SIZE = 256; // Maximum buffer size to prevent memory issues
+    
+    // Sync command handling to prevent race conditions
+    std::atomic<bool> m_pendingSyncCommand = false;
+    QByteArray m_syncCommandResponse;
+    QMutex m_syncResponseMutex;
+    QWaitCondition m_syncResponseCondition;
+    
+    // Enhanced error handling
+    void handleSerialError(QSerialPort::SerialPortError error);
+    void attemptRecovery();
+    void resetErrorCounters();
+    bool isRecoveryNeeded() const;
+    void setupConnectionWatchdog();
+    void stopConnectionWatchdog();
+    int anotherBaudrate();
     QString statusCodeToString(uint8_t status);
 };
 

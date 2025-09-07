@@ -46,9 +46,9 @@
 #include <QMediaFormat>
 #include <QMediaMetaData>
 #include <QMediaRecorder>
-#include <QVideoWidget>
 #include <QStackedLayout>
 #include <QMessageBox>
+#include <QCheckBox>
 #include <QImageCapture>
 #include <QToolBar>
 #include <QClipboard>
@@ -113,7 +113,7 @@ QPixmap recolorSvg(const QString &svgPath, const QColor &color, const QSize &siz
 }
 
 MainWindow::MainWindow(LanguageManager *languageManager, QWidget *parent) :  ui(new Ui::MainWindow),
-                            m_audioManager(new AudioManager(this)),
+                            m_audioManager(&AudioManager::getInstance()),
                             videoPane(new VideoPane(this)),
                             stackedLayout(new QStackedLayout(this)),
                             toolbarManager(new ToolbarManager(this)),
@@ -238,6 +238,9 @@ MainWindow::MainWindow(LanguageManager *languageManager, QWidget *parent) :  ui(
     qCDebug(log_ui_mainwindow) << "Observe Video HID connected...";
     VideoHid::getInstance().setEventCallback(this);
 
+    qCDebug(log_ui_mainwindow) << "Starting AudioManager...";
+    AudioManager::getInstance().start();
+
     qCDebug(log_ui_mainwindow) << "Observe video input changed...";
     // Note: Automatic camera switching on device changes has been disabled
     // Camera devices will only be switched manually through the UI
@@ -249,9 +252,6 @@ MainWindow::MainWindow(LanguageManager *languageManager, QWidget *parent) :  ui(
 
     connect(ui->actionMouseAutoHide, &QAction::triggered, this, &MainWindow::onActionMouseAutoHideTriggered);
     connect(ui->actionMouseAlwaysShow, &QAction::triggered, this, &MainWindow::onActionMouseAlwaysShowTriggered);
-
-    qCDebug(log_ui_mainwindow) << "Observe reset HID triggered...";
-    connect(ui->actionResetHID, &QAction::triggered, this, &MainWindow::onActionResetHIDTriggered);
 
     qCDebug(log_ui_mainwindow) << "Observe factory reset HID triggered...";
     connect(ui->actionFactory_reset_HID, &QAction::triggered, this, &MainWindow::onActionFactoryResetHIDTriggered);
@@ -318,12 +318,19 @@ MainWindow::MainWindow(LanguageManager *languageManager, QWidget *parent) :  ui(
     // Initialize camera with video output for proper startup
     qCDebug(log_ui_mainwindow) << "Initializing camera with video output...";
     QTimer::singleShot(200, this, [this]() {
-        bool success = m_cameraManager->initializeCameraWithVideoOutput(videoPane->getVideoItem());
+        bool success = m_cameraManager->initializeCameraWithVideoOutput(videoPane);
         if (success) {
             qDebug() << "✓ Camera successfully initialized with video output";
         } else {
             qCWarning(log_ui_mainwindow) << "Failed to initialize camera with video output";
         }
+    });
+
+    // Initialize audio with a slight delay after camera
+    qCDebug(log_ui_mainwindow) << "Initializing audio...";
+    QTimer::singleShot(300, this, [this]() {
+        m_audioManager->initializeAudio();
+        qDebug() << "✓ Audio initialization triggered";
     });
 
     // Connect palette change signal to the slot
@@ -347,6 +354,7 @@ MainWindow::MainWindow(LanguageManager *languageManager, QWidget *parent) :  ui(
     connect(ui->menuBaudrate, &QMenu::triggered, this, &MainWindow::onBaudrateMenuTriggered);
     connect(ui->menuDevice, &QMenu::triggered, this, &MainWindow::onDeviceSelected);
     connect(&SerialPortManager::getInstance(), &SerialPortManager::connectedPortChanged, this, &MainWindow::onPortConnected);
+    connect(&SerialPortManager::getInstance(), &SerialPortManager::armBaudratePerformanceRecommendation, this, &MainWindow::onArmBaudratePerformanceRecommendation);
     
     // Note: Automatic camera device coordination has been disabled
     // Camera devices will only be switched manually through the UI
@@ -491,6 +499,26 @@ void MainWindow::updateDeviceMenu() {
         }
     }
     
+    // If current port chain is null/empty and we have devices, auto-select the first one
+    if ((currentPortChain.isEmpty() || currentPortChain.isNull()) && !uniqueDevicesByPortChain.isEmpty()) {
+        QString firstPortChain = uniqueDevicesByPortChain.firstKey();
+        qCDebug(log_ui_mainwindow) << "Auto-selecting first device with port chain:" << firstPortChain;
+        
+        // Set the first device as current
+        GlobalSetting::instance().setOpenterfacePortChain(firstPortChain);
+        currentPortChain = firstPortChain;
+        
+        // Use the centralized device switching function to actually switch to the first device
+        DeviceManager& deviceManager = DeviceManager::getInstance();
+        auto result = deviceManager.switchToDeviceByPortChainWithCamera(firstPortChain, m_cameraManager);
+        
+        if (result.success) {
+            qCInfo(log_ui_mainwindow) << "✓ Auto device switch successful:" << result.statusMessage;
+        } else {
+            qCWarning(log_ui_mainwindow) << "Auto device switch failed or partial:" << result.statusMessage;
+        }
+    }
+    
     // Add action for each unique device
     for (auto it = uniqueDevicesByPortChain.begin(); it != uniqueDevicesByPortChain.end(); ++it) {
         const DeviceInfo& device = it.value();
@@ -630,7 +658,7 @@ void MainWindow::initCamera()
 #endif
     // Camera devices:
     updateCameras();
-    calculate_video_position();
+    // calculate_video_position();
     GlobalVar::instance().setWinWidth(this->width());
     GlobalVar::instance().setWinHeight(this->height());
 }
@@ -643,17 +671,21 @@ void MainWindow::checkInitSize(){
     QRect screenGeometry = currentScreen->geometry();
     int screenWidth = screenGeometry.width();
     int screenHeight = screenGeometry.height();
-    
-    // Calculate 50% of screen size
-    int windowWidth = screenWidth / 2;
+    int titleBarHeight = this->frameGeometry().height() - this->geometry().height();
+    int menuBarHeight = this->menuBar()->height();
+    int statusBarHeight = ui->statusbar->height();
+    int height = titleBarHeight + menuBarHeight + statusBarHeight;
+
     int windowHeight = screenHeight / 2;
-    
+    int windowWidth = int(windowHeight * GlobalSetting::instance().getScreenRatio()) + height;
+
     // Set window size to 50% of screen size
     resize(windowWidth, windowHeight);
     
     // Center the window on screen
     int x = (screenWidth - windowWidth) / 2;
-    int y = (screenHeight - windowHeight) / 2;
+    int y = (screenHeight - windowHeight) / 2 - (height / 2);
+    qCDebug(log_ui_mainwindow) << "checkInitSize: Window position:" << x << "," << y;
     move(x, y);
     
     qCDebug(log_ui_mainwindow) << "checkInitSize: Screen size:" << screenWidth << "x" << screenHeight;
@@ -667,126 +699,180 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 
     static qint64 lastResizeTime = 0;
     qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+    const qint64 RESIZE_THROTTLE_MS = 50;
     
-    if (isFullScreenMode() || (currentTime - lastResizeTime) < 50) { // 100ms
+    // Skip resize if in fullscreen mode or throttled
+    if (isFullScreenMode() || (currentTime - lastResizeTime) < RESIZE_THROTTLE_MS) {
         return;
     }
 
-    // Get the available screen width and height
-    QScreen *currentScreen = this->screen();
-    QRect availableGeometry = currentScreen->availableGeometry();
-    int availableWidth = availableGeometry.width();
-    int availableHeight = availableGeometry.height();
-    if (event->size().width() >= availableWidth || event->size().height() >= availableHeight) {
-        qCDebug(log_ui_mainwindow) << "Resize event ignored due to exceeding screen bounds.";
-        return;
+    // Check if window is maximized - if so, allow resize to proceed
+    bool isMaximized = (this->windowState() & Qt::WindowMaximized);
+    
+    if (!isMaximized) {
+        // Check if new size exceeds screen bounds only for non-maximized windows
+        QScreen *currentScreen = this->screen();
+        QRect availableGeometry = currentScreen->availableGeometry();
+        int availableWidth = availableGeometry.width();
+        int availableHeight = availableGeometry.height();
+        
+        if (event->size().width() >= availableWidth || event->size().height() >= availableHeight) {
+            qCDebug(log_ui_mainwindow) << "Resize event ignored due to exceeding screen bounds.";
+            return;
+        }
     }
     
     lastResizeTime = currentTime;
     QMainWindow::resizeEvent(event);
     doResize();
-    
-    // m_cornerWidgetManager->updateButtonVisibility(this->width());
-    m_cornerWidgetManager->updatePosition(this->width(), ui->menubar->height(), isFullScreenMode());
+    qCDebug(log_ui_mainwindow) << "mainwindow size: " << this->size() << "VideoPane size:" << videoPane->size();
+}
 
-} // end resize event function
-
-void MainWindow::doResize(){
-    // Check if the window is maximized
+void MainWindow::doResize() {
+    // Log window state
     if (this->windowState() & Qt::WindowMaximized) {
-        // Handle maximized state
         qCDebug(log_ui_mainwindow) << "Window is maximized.";
-        // You can update the window icon here if needed
     } else {
-        // Handle normal state
         qCDebug(log_ui_mainwindow) << "Window is normal.";
-        // You can update the window icon here if needed
     }
-    // Define the desired aspect ratio
+
+    // Get screen and system information
     QScreen *currentScreen = this->screen();
     QRect availableGeometry = currentScreen->availableGeometry();
     systemScaleFactor = currentScreen->devicePixelRatio();
-    double captureAspectRatio;
-    if(GlobalVar::instance().getCaptureWidth() && GlobalVar::instance().getCaptureHeight()){
+    
+    // Calculate aspect ratios
+    double captureAspectRatio = 1.0;
+    if (GlobalVar::instance().getCaptureWidth() && GlobalVar::instance().getCaptureHeight()) {
         video_width = GlobalVar::instance().getCaptureWidth();
         video_height = GlobalVar::instance().getCaptureHeight();
         captureAspectRatio = static_cast<double>(video_width) / video_height;
     }
-    double aspect_ratio = GlobalSetting::instance().getScreenRatio();
+    double aspectRatio = GlobalSetting::instance().getScreenRatio();
     
-    // Get the available screen width and height
+    // Get dimensions
     int availableWidth = availableGeometry.width();
     int availableHeight = availableGeometry.height();
-    // Get the current window size
-    int currentHeight = this->height();
     int currentWidth = this->width();
+    int currentHeight = this->height();
     
-    // Calculate the height of the title bar, menu bar, and status bar
+    // Calculate UI element heights
     int titleBarHeight = this->frameGeometry().height() - this->geometry().height();
     int menuBarHeight = this->menuBar()->height();
     int statusBarHeight = ui->statusbar->height();
     int maxContentHeight = availableHeight - titleBarHeight - menuBarHeight - statusBarHeight;
+    
+    // Check if resize is needed due to screen bounds
     bool needResize = (currentWidth >= availableWidth || currentHeight >= availableHeight);
+    
     if (needResize) {
-        // Adjust size while maintaining aspect ratio
-        if (currentWidth >= availableWidth) {
-            currentWidth = availableWidth;
-        }
-        if (currentHeight >= maxContentHeight) {
-            currentHeight = std::min(maxContentHeight + menuBarHeight + statusBarHeight, availableHeight);
-        }
-
-        int newVideoHeight = std::min(currentHeight - menuBarHeight - statusBarHeight, maxContentHeight);
-        int newVideoWidth = static_cast<int>(newVideoHeight * aspect_ratio);
-
-        if (currentWidth < newVideoWidth) {
-            // If video width is larger than the window's width, adjust based on width
-            newVideoWidth = currentWidth;
-            newVideoHeight = static_cast<int>(newVideoWidth / aspect_ratio);
-        }
-
-        // Calculate horizontal offset for centering
-        int horizontalOffset = (currentWidth - newVideoWidth) / 2;
-
-        // Apply changes to UI components
-        // videoPane->setMinimumSize(newVideoWidth, newVideoHeight);
-        videoPane->resize(newVideoWidth, newVideoHeight);
-        videoPane->move(horizontalOffset, videoPane->y());
-        
-        // Resize main window if necessary
-        if (currentWidth != availableWidth && currentHeight != availableHeight) {
-            qCDebug(log_ui_mainwindow) << "Resize to Width " << currentWidth << "\tHeight: " << currentHeight << ", due to exceeding screen bounds.";
-            qCDebug(log_ui_mainwindow) << "Available Width " << availableWidth << "\tHeight: " << availableHeight;
-            resize(currentWidth, currentHeight);
-        }
- 
+        qCDebug(log_ui_mainwindow) << "Need resize due to screen bounds.";
+        handleScreenBoundsResize(currentWidth, currentHeight, availableWidth, availableHeight, 
+                                maxContentHeight, menuBarHeight, statusBarHeight, aspectRatio);
     } else {
-        // When within screen bounds, adjust height according to width and aspect ratio
-        int contentHeight = static_cast<int>(currentWidth / aspect_ratio) + menuBarHeight + statusBarHeight;
-        int adjustedContentHeight = contentHeight - menuBarHeight - statusBarHeight;
-        if (aspect_ratio < 1.0){
-            currentWidth = static_cast<int>(currentHeight * aspect_ratio);
-            adjustedContentHeight = currentHeight - menuBarHeight - statusBarHeight;
-            int offsetX = static_cast<int>((videoPane->width()-currentWidth) /2);
-            int offsetY = static_cast<int>((videoPane->height()-adjustedContentHeight) /2);
-            int contentwidth = static_cast<int>(adjustedContentHeight * captureAspectRatio);
-            // videoPane->setMinimumSize(contentwidth, adjustedContentHeight);
-            videoPane->resize(contentwidth, adjustedContentHeight);
-            qDebug() << "setDisplayRegion Resize videoPane to width: " << currentWidth << " height: " << currentHeight << " offset: " << offsetX << offsetY << "videoPane width: " << videoPane->width();
-            setMinimumSize(100, 500);
-            qCDebug(log_ui_mainwindow) << "Resize to Width " << currentWidth << "\tHeight: " << currentHeight << ", due to aspect ratio < 1.0.";
-            resize(currentWidth, currentHeight);
-        }else{
-            // videoPane->setMinimumSize(currentWidth, adjustedContentHeight);
-            videoPane->resize(currentWidth, adjustedContentHeight);
-            qCDebug(log_ui_mainwindow) << "Resize to Width " << currentWidth << "\tHeight: " << currentHeight << ", due to aspect ratio >= 1.0.";
-            resize(currentWidth, contentHeight);
-        }
-        
+        qCDebug(log_ui_mainwindow) << "No resize needed.";
+        handleAspectRatioResize(currentWidth, currentHeight, menuBarHeight, statusBarHeight, 
+                               aspectRatio, captureAspectRatio);
     }
+    
     // Update global state
     GlobalVar::instance().setWinWidth(this->width());
     GlobalVar::instance().setWinHeight(this->height());
+}
+
+void MainWindow::handleScreenBoundsResize(int &currentWidth, int &currentHeight, 
+                                         int availableWidth, int availableHeight,
+                                         int maxContentHeight, int menuBarHeight, 
+                                         int statusBarHeight, double aspectRatio) {
+    // Adjust size while maintaining aspect ratio
+    if (currentWidth >= availableWidth) {
+        currentWidth = availableWidth;
+    }
+    if (currentHeight >= maxContentHeight) {
+        currentHeight = std::min(maxContentHeight + menuBarHeight + statusBarHeight, availableHeight);
+    }
+
+    int newVideoHeight = std::min(currentHeight - menuBarHeight - statusBarHeight, maxContentHeight);
+    int newVideoWidth = static_cast<int>(newVideoHeight * aspectRatio);
+
+    if (currentWidth < newVideoWidth) {
+        // If video width is larger than the window's width, adjust based on width
+        newVideoWidth = currentWidth;
+        newVideoHeight = static_cast<int>(newVideoWidth / aspectRatio);
+    }
+
+    // Apply changes to video pane
+    videoPane->resize(newVideoWidth, newVideoHeight);
+    
+    // Resize main window if necessary
+    if (currentWidth != availableWidth && currentHeight != availableHeight) {
+        qCDebug(log_ui_mainwindow) << "Resize to Width:" << currentWidth 
+                                   << "Height:" << currentHeight 
+                                   << "due to exceeding screen bounds.";
+        qCDebug(log_ui_mainwindow) << "Available Width:" << availableWidth 
+                                   << "Height:" << availableHeight;
+        resize(currentWidth, currentHeight);
+    }
+}
+
+void MainWindow::handleAspectRatioResize(int currentWidth, int currentHeight, 
+                                        int menuBarHeight, int statusBarHeight,
+                                        double aspectRatio, double captureAspectRatio) {
+    // When within screen bounds, adjust height according to width and aspect ratio
+    int contentHeight = static_cast<int>(currentWidth / aspectRatio) + menuBarHeight + statusBarHeight;
+    int adjustedContentHeight = contentHeight - menuBarHeight - statusBarHeight;
+    
+    // Check if window is maximized
+    bool isMaximized = (this->windowState() & Qt::WindowMaximized);
+    
+    if (isMaximized) {
+        // For maximized windows, use the full available space
+        adjustedContentHeight = currentHeight - menuBarHeight - statusBarHeight;
+        
+        // Calculate video pane size to fill the available area while maintaining aspect ratio
+        int availableWidth = currentWidth;
+        int availableHeight = adjustedContentHeight;
+        
+        // Scale video pane to fit the available area
+        double scaleX = static_cast<double>(availableWidth) / (captureAspectRatio * availableHeight);
+        double scaleY = 1.0;
+        
+        int videoWidth, videoHeight;
+        if (scaleX <= 1.0) {
+            // Height-constrained: video height = available height, width scaled accordingly
+            videoHeight = availableHeight;
+            videoWidth = static_cast<int>(videoHeight * captureAspectRatio);
+        } else {
+            // Width-constrained: video width = available width, height scaled accordingly
+            videoWidth = availableWidth;
+            videoHeight = static_cast<int>(videoWidth / captureAspectRatio);
+        }
+        
+        videoPane->resize(videoWidth, videoHeight);
+        qCDebug(log_ui_mainwindow) << "Maximized window - VideoPane resized to:" << videoWidth << "x" << videoHeight;
+        
+    } else if (aspectRatio < 1.0) {
+        // Portrait orientation
+        int newWidth = static_cast<int>(currentHeight * aspectRatio);
+        adjustedContentHeight = currentHeight - menuBarHeight - statusBarHeight;
+        int contentWidth = static_cast<int>(adjustedContentHeight * captureAspectRatio);
+        
+        videoPane->resize(contentWidth, adjustedContentHeight);
+        setMinimumSize(100, 500);
+        
+        qCDebug(log_ui_mainwindow) << "Resize to Width:" << newWidth 
+                                   << "Height:" << currentHeight 
+                                   << "due to aspect ratio < 1.0";
+        resize(newWidth, currentHeight);
+    } else {
+        // Landscape orientation
+        videoPane->resize(currentWidth, adjustedContentHeight);
+        
+        qCDebug(log_ui_mainwindow) << "Resize to Width:" << currentWidth 
+                                   << "Height:" << contentHeight 
+                                   << "due to aspect ratio >= 1.0";
+        resize(currentWidth, contentHeight);
+    }
 }
 
 void MainWindow::moveEvent(QMoveEvent *event) {
@@ -865,21 +951,6 @@ void MainWindow::onActionMouseAlwaysShowTriggered()
 {
     GlobalVar::instance().setMouseAutoHide(false);
     GlobalSetting::instance().setMouseAutoHideEnable(false);
-}
-
-void MainWindow::onActionResetHIDTriggered()
-{
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::warning(this, "Confirm Reset Keyboard and Mouse?",
-                                        "Resetting the Keyboard & Mouse chip will apply new settings. Do you want to proceed?",
-                                  QMessageBox::Yes | QMessageBox::No);
-
-    if (reply == QMessageBox::Yes) {
-        qCDebug(log_ui_mainwindow) << "onActionResetHIDTriggered";
-        HostManager::getInstance().resetHid();
-    } else {
-        qCDebug(log_ui_mainwindow) << "Reset HID canceled by user.";
-    }
 }
 
 void MainWindow::onActionFactoryResetHIDTriggered()
@@ -1270,7 +1341,100 @@ void MainWindow::onBaudrateMenuTriggered(QAction* action)
     bool ok;
     int baudrate = action->text().toInt(&ok);
     if (ok) {
-        SerialPortManager::getInstance().setBaudRate(baudrate);
+        qCDebug(log_ui_mainwindow) << "User selected baudrate from menu:" << baudrate;
+        
+        if(baudrate == 9600){
+            SerialPortManager::getInstance().factoryResetHipChip();
+        }else{
+            SerialPortManager::getInstance().setUserSelectedBaudrate(baudrate);
+        }
+        
+        // Show message to user about device reconnection requirement
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle("Baudrate Changed");
+        msgBox.setText(QString("Baudrate has been changed to %1.\n\n"
+                              "Please unplug and replug the device to make the new baudrate setting effective.")
+                              .arg(baudrate));
+        msgBox.addButton(QMessageBox::Ok);
+        msgBox.exec();
+    } else {
+        qCWarning(log_ui_mainwindow) << "Invalid baudrate selected from menu:" << action->text();
+    }
+}
+
+void MainWindow::onArmBaudratePerformanceRecommendation(int currentBaudrate)
+{
+    // Get the current baudrate from SerialPortManager instead of using the parameter
+    int actualCurrentBaudrate = SerialPortManager::getInstance().getCurrentBaudrate();
+    
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle("Performance Recommendation");
+    
+    QPushButton* actionButton = nullptr;
+    QPushButton* stayButton = nullptr;
+
+
+    if (actualCurrentBaudrate == 9600) {
+        msgBox.setText("You are running on an ARM architecture with 9600 baudrate.\n\n"
+                      "You can switch to 115200 baudrate for potentially faster communication, "
+                      "but it may use more CPU resources.");
+        actionButton = msgBox.addButton("Switch to 115200", QMessageBox::AcceptRole);
+        stayButton = msgBox.addButton("Stay in 9600", QMessageBox::RejectRole);
+    } else {
+        msgBox.setText(QString("You are running on an ARM architecture with %1 baudrate.\n\n"
+                              "For better performance and lower CPU usage, we recommend using 9600 baudrate instead.")
+                              .arg(actualCurrentBaudrate));
+        actionButton = msgBox.addButton("Switch to 9600", QMessageBox::AcceptRole);
+        stayButton = msgBox.addButton("Stay in 115200", QMessageBox::RejectRole);
+    }
+    
+    
+    QCheckBox* dontShowCheckBox = new QCheckBox("Don't show this recommendation again");
+    msgBox.setCheckBox(dontShowCheckBox);
+    
+    msgBox.exec();
+    
+    QAbstractButton* clickedBtn = msgBox.clickedButton();
+    bool shouldSwitch = (clickedBtn == actionButton);
+    bool dontShowAgain = dontShowCheckBox->isChecked();
+    
+    // If user closed the dialog (clicked X or pressed Escape), don't proceed with any action
+    if (clickedBtn == nullptr) {
+        qCInfo(log_ui_mainwindow) << "User closed the dialog without making a choice";
+        return;
+    }
+    
+    // Handle "don't show again" in UI
+    if (dontShowAgain) {
+        qCInfo(log_ui_mainwindow) << "User chose to disable ARM baudrate performance prompts";
+        GlobalSetting::instance().setArmBaudratePromptDisabled(true);
+    }
+    
+    // Handle baudrate switching
+    if (shouldSwitch) {
+        int targetBaudrate = (actualCurrentBaudrate == 9600) ? 115200 : 9600;
+        qCInfo(log_ui_mainwindow) << "User chose to switch from" << actualCurrentBaudrate << "to" << targetBaudrate << "baudrate";
+        if(targetBaudrate == 115200){
+            SerialPortManager::getInstance().setUserSelectedBaudrate(targetBaudrate);
+        } else {
+            //For some reason, switching back to 9600 cannot dynamically, need to reset the HID chip
+            SerialPortManager::getInstance().factoryResetHipChip();
+        }
+        
+        
+        // Show message to user about device reconnection requirement
+        QMessageBox infoBox(this);
+        infoBox.setIcon(QMessageBox::Information);
+        infoBox.setWindowTitle("Baudrate Changed");
+        infoBox.setText(QString("Baudrate has been changed to %1.\n\n"
+                              "Please unplug and replug the device to make the new baudrate setting effective.")
+                              .arg(targetBaudrate));
+        infoBox.addButton(QMessageBox::Ok);
+        infoBox.exec();
+    } else {
+        qCInfo(log_ui_mainwindow) << "User chose to keep current baudrate:" << actualCurrentBaudrate;
     }
 }
 
@@ -1424,11 +1588,17 @@ void MainWindow::checkMousePosition()
 void MainWindow::onVideoSettingsChanged() {
     if (m_cameraManager) {
         // Reinitialize camera with graphics video output to ensure proper connection
-        bool success = m_cameraManager->initializeCameraWithVideoOutput(videoPane->getVideoItem());
+        bool success = m_cameraManager->initializeCameraWithVideoOutput(videoPane);
         if (!success) {
             // Fallback to just setting video output
             m_cameraManager->setVideoOutput(videoPane->getVideoItem());
         }
+    }
+    
+    // Also reinitialize audio when video settings change
+    if (m_audioManager) {
+        qCDebug(log_ui_mainwindow) << "Reinitializing audio due to video settings change...";
+        m_audioManager->initializeAudio();
     }
     int inputWidth = GlobalVar::instance().getInputWidth();
     int inputHeight = GlobalVar::instance().getInputHeight();
@@ -1628,13 +1798,15 @@ MainWindow::~MainWindow()
     }
     
     if (m_audioManager) {
-        m_audioManager->deleteLater();
+        // AudioManager is now a singleton, so we just disconnect and clear the reference
+        m_audioManager->disconnect();
         m_audioManager = nullptr;
-        qCDebug(log_ui_mainwindow) << "m_audioManager destroyed successfully";
+        qCDebug(log_ui_mainwindow) << "m_audioManager reference cleared successfully";
     }
     
     // 6. Clean up static instances
     VideoHid::getInstance().stop();
+    AudioManager::getInstance().stop();
     SerialPortManager::getInstance().stop();
     
     // 7. Delete UI last
@@ -1679,6 +1851,7 @@ void MainWindow::animateVideoPane() {
 
     // Get toolbar visibility and window state
     bool isToolbarVisible = toolbarManager->getToolbar()->isVisible();
+    bool isMaximized = (this->windowState() & Qt::WindowMaximized);
 
     // Calculate content height based on toolbar visibility
     int contentHeight;
@@ -1687,20 +1860,32 @@ void MainWindow::animateVideoPane() {
 
     int contentWidth;
     double aspect_ratio = static_cast<double>(video_width) / video_height;
-    if (isToolbarVisible) {
-        contentHeight -= toolbarManager->getToolbar()->height();
-        contentWidth = static_cast<int>(contentHeight * aspect_ratio);
-        qCDebug(log_ui_mainwindow) << "toolbarHeigth" << toolbarManager->getToolbar()->height() << "content height" <<contentHeight << "content width" << contentWidth;
-    }else{
-        if (!isFullScreenMode()) contentHeight = this->height() - ui->statusbar->height() - ui->menubar->height();
-        else contentHeight = this->height() - ui->menubar->height();
-        contentWidth = static_cast<int>(contentHeight * aspect_ratio);
+    
+    if (isMaximized) {
+        // For maximized windows, use the full window width and calculated height
+        contentWidth = this->width();
+        if (isToolbarVisible) {
+            contentHeight -= toolbarManager->getToolbar()->height();
+        }
+        // Don't constrain by aspect ratio for maximized windows - let VideoPane handle it
+        qCDebug(log_ui_mainwindow) << "Maximized window - contentWidth:" << contentWidth << "contentHeight:" << contentHeight;
+    } else {
+        // Normal window behavior
+        if (isToolbarVisible) {
+            contentHeight -= toolbarManager->getToolbar()->height();
+            contentWidth = static_cast<int>(contentHeight * aspect_ratio);
+            qCDebug(log_ui_mainwindow) << "toolbarHeigth" << toolbarManager->getToolbar()->height() << "content height" <<contentHeight << "content width" << contentWidth;
+        } else {
+            if (!isFullScreenMode()) contentHeight = this->height() - ui->statusbar->height() - ui->menubar->height();
+            else contentHeight = this->height() - ui->menubar->height();
+            contentWidth = static_cast<int>(contentHeight * aspect_ratio);
+        }
     }
 
     // Resize the video pane
-    // videoPane->setMinimumSize(contentWidth, contentHeight);
     videoPane->resize(contentWidth, contentHeight);
 
+    // Position the video pane (center horizontally if window is wider than video pane)
     if (this->width() > videoPane->width()) {
         // Calculate new position
         int horizontalOffset = (this->width() - videoPane->width()) / 2;
@@ -1737,6 +1922,10 @@ void MainWindow::animateVideoPane() {
             blockSignals(false);
         }
     } else {
+        // VideoPane fills the window width, position at x=0
+        if (videoPane) {
+            videoPane->move(0, videoPane->y());
+        }
         setUpdatesEnabled(true);
         blockSignals(false);
         update();

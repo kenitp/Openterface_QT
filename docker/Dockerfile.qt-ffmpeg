@@ -1,0 +1,68 @@
+# Build libusb and FFmpeg
+ARG BASE_IMAGE=ghcr.io/techxartisanstudio/openterface-qtbuild-base:ubuntu-24.04-amd64
+ARG UBUNTU_VERSION=24.04
+ARG TARGETARCH=amd64
+FROM ${BASE_IMAGE}
+
+WORKDIR ${BUILD_DIR}
+
+# Build libusb from source
+RUN echo "Building libusb ${LIBUSB_VERSION} from source..." && \
+    curl -L -o libusb.tar.bz2 "https://github.com/libusb/libusb/releases/download/v${LIBUSB_VERSION}/libusb-${LIBUSB_VERSION}.tar.bz2" && \
+    tar xf libusb.tar.bz2 && \
+    mv "libusb-${LIBUSB_VERSION}" libusb && \
+    rm libusb.tar.bz2 && \
+    cd libusb && \
+    ./configure --prefix="${FFMPEG_PREFIX}" --enable-static --disable-shared --disable-udev && \
+    make -j$(nproc) && \
+    make install && \
+    cd ${BUILD_DIR} && \
+    rm -rf libusb
+
+# Build libjpeg-turbo from source
+RUN echo "Building libjpeg-turbo from source..." && \
+    curl -L -o libjpeg-turbo.tar.gz "https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/3.0.4.tar.gz" && \
+    tar xzf libjpeg-turbo.tar.gz && \
+    rm libjpeg-turbo.tar.gz && \
+    cd libjpeg-turbo-3.0.4 && \
+    mkdir build && \
+    cd build && \
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX="${FFMPEG_PREFIX}" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DENABLE_STATIC=ON \
+        -DENABLE_SHARED=OFF \
+        -DWITH_JPEG8=ON \
+        -DWITH_TURBOJPEG=ON && \
+    make -j$(nproc) && \
+    make install && \
+    cd ${BUILD_DIR} && \
+    rm -rf libjpeg-turbo-3.0.4
+
+# Build FFmpeg statically
+RUN echo "Building FFmpeg ${FFMPEG_VERSION} statically..." && \
+    curl -L -o ffmpeg.tar.bz2 "https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2" && \
+    tar xjf ffmpeg.tar.bz2 && \
+    rm ffmpeg.tar.bz2 && \
+    cd "ffmpeg-${FFMPEG_VERSION}" && \
+    ./configure \
+        --prefix="${FFMPEG_PREFIX}" \
+        --enable-static \
+        --disable-shared \
+        --disable-doc \
+        --disable-programs \
+        --disable-outdevs \
+        --enable-pic \
+        --enable-libpulse \
+        --disable-debug && \
+    make -j$(nproc) && \
+    make install && \
+    cd ${BUILD_DIR} && \
+    rm -rf "ffmpeg-${FFMPEG_VERSION}"
+
+# Verify FFmpeg installation
+RUN echo "Verifying FFmpeg installation..." && \
+    ls -la ${FFMPEG_PREFIX}/lib/libav*.a && \
+    ls -la ${FFMPEG_PREFIX}/include/libav*/
+
+WORKDIR /workspace

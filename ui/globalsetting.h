@@ -50,6 +50,12 @@ public:
     void setVideoSettings(int width, int height, int fps);
 
     void loadVideoSettings();
+
+    void setMediaBackend(const QString &backend);
+    QString getMediaBackend() const;
+    
+    void setGStreamerPipelineTemplate(const QString &pipelineTemplate);
+    QString getGStreamerPipelineTemplate() const;
     
     void setCameraDeviceSetting(QString deviceDescription);
 
@@ -94,6 +100,16 @@ public:
     void setOpenterfacePortChain(const QString& portChain);
     QString getOpenterfacePortChain() const;
     void clearOpenterfacePortChain();
+
+    // Serial port baudrate management
+    void setSerialPortBaudrate(int baudrate);
+    int getSerialPortBaudrate() const;
+    void clearSerialPortBaudrate();
+    
+    // ARM architecture baudrate performance prompt
+    void setArmBaudratePromptDisabled(bool disabled);
+    bool getArmBaudratePromptDisabled() const;
+    void resetArmBaudratePrompt(); // Reset the prompt setting
 
 private:
     QSettings m_settings;

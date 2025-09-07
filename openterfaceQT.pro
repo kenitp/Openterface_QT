@@ -19,6 +19,8 @@ SOURCES += main.cpp \
     target/mouseeventdto.cpp \
     host/audiomanager.cpp \
     host/cameramanager.cpp \
+    host/multimediabackend.cpp \
+    host/backend/qtmultimediabackendhandler.cpp \
     ui/statusbar/statuswidget.cpp \
     video/videohid.cpp \
     video/firmwarewriter.cpp \
@@ -68,6 +70,14 @@ SOURCES += main.cpp \
     ui/screenscale.cpp \
     ui/cornerwidget/cornerwidgetmanager.cpp
 
+# Platform-specific backend handlers (exclude on Windows)
+!win32 {
+    SOURCES += host/backend/ffmpegbackendhandler.cpp \
+               host/backend/gstreamerbackendhandler.cpp
+    HEADERS += host/backend/ffmpegbackendhandler.h \
+               host/backend/gstreamerbackendhandler.h
+}
+
 
 HEADERS  += \
     global.h \
@@ -79,6 +89,8 @@ HEADERS  += \
     target/mouseeventdto.h \
     host/audiomanager.h \
     host/cameramanager.h \
+    host/multimediabackend.h \
+    host/backend/qtmultimediabackendhandler.h \
     ui/statusbar/statuswidget.h \
     video/videohid.h \
     video/firmwarewriter.h \
@@ -158,6 +170,17 @@ win32 {
     INCLUDEPATH += $$PWD/lib
     LIBS += -L$$PWD/lib -llibusb-1.0 -loleaut32 -lwinpthread
 
+    # Add FFmpeg support for Windows
+    DEFINES += HAVE_FFMPEG
+
+    # Add libjpeg-turbo for Windows (commented out - not available)
+    # LIBS += -ljpeg
+    # DEFINES += HAVE_LIBJPEG_TURBO
+
+    # Add libjpeg-turbo for Windows (commented out - not available)
+    # LIBS += -ljpeg
+    # DEFINES += HAVE_LIBJPEG_TURBO
+
     RESOURCES += driver/windows/drivers.qrc
 }
 
@@ -175,6 +198,20 @@ unix {
         PKGCONFIG += libudev
         DEFINES += HAVE_LIBUDEV
         LIBS += -ludev
+        
+        # Add GStreamer support
+        PKGCONFIG += gstreamer-1.0 gstreamer-video-1.0
+        DEFINES += HAVE_GSTREAMER
+        
+        # Add FFmpeg support
+        PKGCONFIG += libavformat libavcodec libavutil libswscale
+        DEFINES += HAVE_FFMPEG
+        
+        # Add libjpeg-turbo support
+        PKGCONFIG += libjpeg
+        PKGCONFIG += libavdevice
+        DEFINES += HAVE_LIBJPEG_TURBO
+        LIBS += -ljpeg
     }
 
     RESOURCES += driver/linux/drivers.qrc

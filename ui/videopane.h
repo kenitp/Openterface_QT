@@ -29,7 +29,9 @@
 #include <QtWidgets>
 #include <QtMultimedia>
 #include <QtMultimediaWidgets>
+#include <QLoggingCategory>
 
+Q_DECLARE_LOGGING_CATEGORY(log_ui_video)
 
 class VideoPane : public QGraphicsView
 {
@@ -63,6 +65,24 @@ public:
     void zoomOut(double factor = 0.8);
     void fitToWindow();
     void actualSize();
+    
+    // Direct GStreamer support methods (based on widgets_main.cpp approach)
+    void enableDirectGStreamerMode(bool enable = true);
+    bool isDirectGStreamerModeEnabled() const { return m_directGStreamerMode; }
+    WId getVideoOverlayWindowId() const;
+    void setupForGStreamerOverlay();
+    QWidget* getOverlayWidget() const { return m_overlayWidget; }
+        
+    // FFmpeg direct video frame support
+    void updateVideoFrame(const QPixmap& frame);
+    void enableDirectFFmpegMode(bool enable = true);
+    bool isDirectFFmpegModeEnabled() const { return m_directFFmpegMode; }
+
+    // Mouse position transformation for InputHandler
+    QPoint getTransformedMousePosition(const QPoint& viewportPos);
+    
+    // Debug helper to validate coordinate transformation consistency
+    void validateMouseCoordinates(const QPoint& original, const QString& eventType);
 
 signals:
     void mouseMoved(const QPoint& position, const QString& event);
@@ -104,6 +124,13 @@ private:
     QSize m_originalVideoSize;
     bool m_maintainAspectRatio;
     
+    // Direct GStreamer mode support
+    bool m_directGStreamerMode;
+    QWidget* m_overlayWidget; // Widget for direct video overlay
+    
+    // Direct FFmpeg mode support
+    bool m_directFFmpegMode;
+    
     MouseEventDTO* calculateRelativePosition(QMouseEvent *event);
     MouseEventDTO* calculateAbsolutePosition(QMouseEvent *event);
     MouseEventDTO* calculateMouseEventDto(QMouseEvent *event);
@@ -112,7 +139,6 @@ private:
     void updateVideoItemTransform();
     void centerVideoItem();
     void setupScene();
-    QPoint getTransformedMousePosition(const QPoint& viewportPos);
 };
 
 #endif
