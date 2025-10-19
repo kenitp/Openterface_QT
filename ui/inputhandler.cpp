@@ -6,6 +6,25 @@
 #include <QScreen>
 #include <QDateTime>
 
+/*
+ * CRITICAL FIX for maximize screen crash:
+ * 
+ * ROOT CAUSE: Debug logging was calling m_videoPane->isDirectGStreamerModeEnabled() 
+ * for EVERY event, including MetaCall events. During window maximize/resize, VideoPane
+ * is in an inconsistent state and calling its methods causes a segmentation fault.
+ * 
+ * FIXES APPLIED:
+ * 1. Removed method calls from debug logging - only check if pointer is null, don't call methods
+ * 2. Using QPointer instead of raw pointers for automatic null safety
+ * 3. Filtering out internal Qt events (MetaCall, Timer, Paint, etc.) - don't process them
+ * 4. Added multiple null checks before accessing VideoPane
+ * 
+ * The crash happened because:
+ * - Qt delivers MetaCall event to InputHandler during window state change
+ * - Debug log tries to call isDirectGStreamerModeEnabled() on VideoPane
+ * - VideoPane is being resized/repainted and is in inconsistent state
+ * - Method call on inconsistent object -> SEGFAULT
+ */
 
 Q_LOGGING_CATEGORY(log_ui_input, "opf.ui.input")
 
@@ -21,6 +40,11 @@ InputHandler::InputHandler(VideoPane *videoPane, QObject *parent)
 
 MouseEventDTO* InputHandler::calculateMouseEventDto(QMouseEvent *event)
 {
+    if (!m_videoPane) {
+        qCWarning(log_ui_input) << "InputHandler::calculateMouseEventDto - m_videoPane is null!";
+        return new MouseEventDTO(0, 0, GlobalVar::instance().isAbsoluteMouseMode());
+    }
+    
     MouseEventDTO* dto = GlobalVar::instance().isAbsoluteMouseMode() ? calculateAbsolutePosition(event) : calculateRelativePosition(event);
     dto->setMouseButton(m_isDragging ? lastMouseButton : 0);
     return dto;
@@ -49,6 +73,14 @@ MouseEventDTO* InputHandler::calculateAbsolutePosition(QMouseEvent *event) {
     // Get the effective video widget (overlay or main VideoPane)
     QWidget* effectiveWidget = getEffectiveVideoWidget();
     
+    // SAFETY: Check if we have a valid widget
+    if (!effectiveWidget || effectiveWidget->width() == 0 || effectiveWidget->height() == 0) {
+        qCWarning(log_ui_input) << "InputHandler::calculateAbsolutePosition - Invalid widget state:"
+                                << "widget=" << effectiveWidget
+                                << "size=" << (effectiveWidget ? effectiveWidget->size() : QSize(0,0));
+        return new MouseEventDTO(0, 0, true);
+    }
+    
     // Transform mouse position if needed
     QPoint transformedPos = transformMousePosition(event, effectiveWidget);
     
@@ -56,6 +88,7 @@ MouseEventDTO* InputHandler::calculateAbsolutePosition(QMouseEvent *event) {
     QPoint videoPos = transformedPos;
     if (m_videoPane && effectiveWidget == m_videoPane) {
         // Use VideoPane's transformation logic for accurate video area mapping
+        // When zoomed, this will handle the coordinate transformation
         videoPos = m_videoPane->getTransformedMousePosition(transformedPos);
         
         // Debug: Log coordinate transformation details
@@ -69,10 +102,38 @@ MouseEventDTO* InputHandler::calculateAbsolutePosition(QMouseEvent *event) {
         }
     }
     
-    qreal absoluteX = static_cast<qreal>(videoPos.x()) / effectiveWidget->width() * 4096;
-    qreal absoluteY = static_cast<qreal>(videoPos.y()) / effectiveWidget->height() * 4096;
-    lastX = static_cast<int>(absoluteX);
-    lastY = static_cast<int>(absoluteY);
+    // Uncomment for debug
+    static int debugCounter = 0;
+    if (++debugCounter % 50 == 1) {
+        qCDebug(log_ui_input) << "Mouse: videoPos=" << videoPos 
+                             << "effectiveWidget=" << effectiveWidget->size() 
+                             << "zoom=" << (m_videoPane ? m_videoPane->getZoomFactor() : 1.0);
+    }
+    
+    // Get target width and height - check for zero to prevent division by zero
+    int targetWidth = effectiveWidget->width();
+    int targetHeight = effectiveWidget->height();
+    
+    if (targetWidth <= 0 || targetHeight <= 0) {
+        qCWarning(log_ui_input) << "Zero dimensions in calculateAbsolutePosition! Widget size:" 
+                               << effectiveWidget->size();
+        return new MouseEventDTO(0, 0, true);
+    }
+    
+    qreal absoluteX = static_cast<qreal>(videoPos.x()) / targetWidth * 4096;
+    qreal absoluteY = static_cast<qreal>(videoPos.y()) / targetHeight * 4096;
+    
+    // Clamp values to valid range (0-4096)
+    lastX = qBound(0, static_cast<int>(absoluteX), 4096);
+    lastY = qBound(0, static_cast<int>(absoluteY), 4096);
+    
+    // More frequent debug logging when zoom is enabled
+    if (m_videoPane && m_videoPane->getZoomFactor() > 1.0 && debugCounter % 20 == 1) {
+        qCDebug(log_ui_input) << "Absolute coords (zoomed): raw=" << videoPos
+                             << "->absolute=" << QPoint(lastX, lastY)
+                             << "zoom=" << m_videoPane->getZoomFactor();
+    }
+    
     return new MouseEventDTO(lastX, lastY, true);
 }
 
@@ -99,6 +160,63 @@ QSize InputHandler::getScreenResolution() {
 
 bool InputHandler::eventFilter(QObject *watched, QEvent *event)
 {
+    // CRITICAL SAFETY: Exit early if event processing is disabled
+    if (!m_processingEnabled) {
+        return QObject::eventFilter(watched, event);
+    }
+    
+    // CRITICAL SAFETY: Check if VideoPane is valid FIRST before any other checks
+    // QPointer will be null if the object is destroyed or in an invalid state
+    if (m_videoPane.isNull() && m_currentEventTarget.isNull()) {
+        qCWarning(log_ui_input) << "InputHandler::eventFilter - Both videoPane and currentEventTarget are null!";
+        return QObject::eventFilter(watched, event);
+    }
+    
+    // CRITICAL SAFETY: Ignore internal Qt events that could cause issues during state changes
+    // MetaCall, Timer, ChildAdded, ChildRemoved, etc. should be passed through without processing
+    // MetaCall is particularly dangerous as it can access object methods during state transitions
+    if (event->type() == QEvent::MetaCall || 
+        event->type() == QEvent::Timer ||
+        event->type() == QEvent::ChildAdded ||
+        event->type() == QEvent::ChildRemoved ||
+        event->type() == QEvent::ChildPolished ||
+        event->type() == QEvent::DeferredDelete ||
+        event->type() == QEvent::Paint ||           // Don't intercept paint events
+        event->type() == QEvent::UpdateRequest ||   // Don't intercept update requests
+        event->type() == QEvent::LayoutRequest) {   // Don't intercept layout requests
+        // Log MetaCall for debugging but don't process it
+        if (event->type() == QEvent::MetaCall) {
+            static int metacallCount = 0;
+            if (++metacallCount % 50 == 1) {
+                qCDebug(log_ui_input) << "InputHandler::eventFilter - Passing through MetaCall event (not processing)";
+            }
+        }
+        return QObject::eventFilter(watched, event);
+    }
+    
+    // CRITICAL SAFETY: Check if watched object is valid and matches our expected targets
+    if (!watched) {
+        qCWarning(log_ui_input) << "InputHandler::eventFilter - watched object is null!";
+        return QObject::eventFilter(watched, event);
+    }
+    
+    // SAFETY: Verify the watched object is one we're tracking
+    // Use data() to get raw pointer from QPointer for comparison
+    QObject* videoPaneObj = m_videoPane.data();
+    QObject* targetObj = m_currentEventTarget.data();
+    
+    bool isValidTarget = (watched == videoPaneObj || watched == targetObj);
+    if (!isValidTarget) {
+        // Not our target, pass through
+        return QObject::eventFilter(watched, event);
+    }
+    
+    // ADDITIONAL SAFETY: Verify VideoPane hasn't become invalid between checks
+    if (m_videoPane.isNull()) {
+        qCWarning(log_ui_input) << "InputHandler::eventFilter - VideoPane became null during event processing!";
+        return QObject::eventFilter(watched, event);
+    }
+    
     // PERFORMANCE: Fast path for mouse move events - avoid expensive logging and checks
     if (event->type() == QEvent::MouseMove) {
         QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
@@ -115,21 +233,19 @@ bool InputHandler::eventFilter(QObject *watched, QEvent *event)
     if (isMouseEvent) {
         mouseEventCount++;
         // Only log first 10 mouse events to reduce debug spam
-        if (mouseEventCount <= 10 && (watched == m_videoPane || watched == m_currentEventTarget)) {
+        if (mouseEventCount <= 10) {
             qCDebug(log_ui_input) << "InputHandler::eventFilter - Event type:" << event->type() 
                      << "watched object:" << watched 
-                     << "current target:" << m_currentEventTarget
-                     << "GStreamer mode:" << (m_videoPane ? m_videoPane->isDirectGStreamerModeEnabled() : false)
+                     << "VideoPane valid:" << !m_videoPane.isNull()
                      << "(logging limited for performance)";
         }
     } else {
         // Log non-mouse events normally (but less frequently)
         static int nonMouseEventCount = 0;
-        if (++nonMouseEventCount % 100 == 1 && (watched == m_videoPane || watched == m_currentEventTarget)) {
+        if (++nonMouseEventCount % 100 == 1) {
             qCDebug(log_ui_input) << "InputHandler::eventFilter - Event type:" << event->type() 
                      << "watched object:" << watched 
-                     << "current target:" << m_currentEventTarget
-                     << "GStreamer mode:" << (m_videoPane ? m_videoPane->isDirectGStreamerModeEnabled() : false);
+                     << "VideoPane valid:" << !m_videoPane.isNull();
         }
     }
     if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick) {
@@ -184,6 +300,12 @@ bool InputHandler::eventFilter(QObject *watched, QEvent *event)
 
 void InputHandler::handleMouseMoveEvent(QMouseEvent *event)
 {
+    // SAFETY: Check if VideoPane is still valid
+    if (!m_videoPane) {
+        qCWarning(log_ui_input) << "InputHandler::handleMouseMoveEvent - m_videoPane is null!";
+        return;
+    }
+    
     // PERFORMANCE OPTIMIZATION: Adaptive mouse throttling to reduce CPU usage
     // High-frequency mouse movements can cause excessive CPU load, especially on Pi
     qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
@@ -254,6 +376,11 @@ void InputHandler::handleMouseMoveEvent(QMouseEvent *event)
 
 void InputHandler::handleMousePressEvent(QMouseEvent* event)
 {
+    if (!m_videoPane) {
+        qCWarning(log_ui_input) << "InputHandler::handleMousePressEvent - m_videoPane is null!";
+        return;
+    }
+    
     QScopedPointer<MouseEventDTO> eventDto(calculateMouseEventDto(event));
     eventDto->setMouseButton(lastMouseButton = getMouseButton(event));
     setDragging(true);
@@ -271,6 +398,11 @@ void InputHandler::handleMousePressEvent(QMouseEvent* event)
 
 void InputHandler::handleMouseReleaseEvent(QMouseEvent* event)
 {
+    if (!m_videoPane) {
+        qCWarning(log_ui_input) << "InputHandler::handleMouseReleaseEvent - m_videoPane is null!";
+        return;
+    }
+    
     QScopedPointer<MouseEventDTO> eventDto(calculateMouseEventDto(event));
     setDragging(false);
     HostManager::getInstance().handleMouseRelease(eventDto.get());
@@ -300,6 +432,10 @@ void InputHandler::handleKeyPressEvent(QKeyEvent *event)
     HostManager::getInstance().handleKeyPress(event);
 
     if(!m_holdingEsc && event->key() == Qt::Key_Escape && !GlobalVar::instance().isAbsoluteMouseMode()) {
+        if (!m_videoPane) {
+            qCWarning(log_ui_input) << "InputHandler::handleKeyPressEvent - m_videoPane is null!";
+            return;
+        }
         qCDebug(log_ui_input) << "Esc Pressed, timer started";
         m_holdingEsc = true;
         m_videoPane->startEscTimer();
@@ -311,6 +447,10 @@ void InputHandler::handleKeyReleaseEvent(QKeyEvent *event)
     HostManager::getInstance().handleKeyRelease(event);
 
     if(m_holdingEsc && event->key() == Qt::Key_Escape && !GlobalVar::instance().isAbsoluteMouseMode()) {
+        if (!m_videoPane) {
+            qCWarning(log_ui_input) << "InputHandler::handleKeyReleaseEvent - m_videoPane is null!";
+            return;
+        }
         qCDebug(log_ui_input) << "Esc Released, timer stop";
         m_videoPane->stopEscTimer();
         m_holdingEsc = false;
@@ -398,37 +538,46 @@ void InputHandler::removeOverlayEventFilter()
 QPoint InputHandler::transformMousePosition(QMouseEvent *event, QWidget* sourceWidget)
 {
     if (!sourceWidget || !m_videoPane) {
+        qCWarning(log_ui_input) << "InputHandler::transformMousePosition - Invalid widget or VideoPane";
         return event->pos();
     }
     
-    // Always use VideoPane's transformation logic for consistency
-    // regardless of whether we're in GStreamer mode or not
-    if (sourceWidget == m_videoPane) {
-        // For VideoPane events, use the direct position - VideoPane handles its own transformation
-        return event->pos();
-    } else if (m_videoPane->isDirectGStreamerModeEnabled() && sourceWidget != m_videoPane) {
-        // For overlay widget events in GStreamer mode, convert to VideoPane coordinates
-        // The overlay widget should have the same coordinate system as the VideoPane
-        // since it's positioned to fill the VideoPane
-        return event->pos();
+    // For all cases, use the direct position
+    // VideoPane::getTransformedMousePosition will handle the proper coordinate transformation
+    // when it's called in calculateAbsolutePosition
+    QPoint pos = event->pos();
+    
+    // Log once in a while for debugging
+    static int debugCounter = 0;
+    if (++debugCounter % 500 == 1) {
+        double zoomFactor = m_videoPane ? m_videoPane->getZoomFactor() : 1.0;
+        bool isGStreamerMode = m_videoPane ? m_videoPane->isDirectGStreamerModeEnabled() : false;
+        bool isVideoPane = (sourceWidget == m_videoPane);
+        
+        qCDebug(log_ui_input) << "Mouse transform input: pos=" << pos 
+                             << "zoom=" << zoomFactor
+                             << "isVideoPane=" << isVideoPane
+                             << "gstreamer=" << isGStreamerMode;
     }
     
-    return event->pos();
+    return pos;
 }
 
 QWidget* InputHandler::getEffectiveVideoWidget() const
 {
-    if (!m_videoPane) {
+    // QPointer automatically becomes null if the object is destroyed
+    if (m_videoPane.isNull()) {
+        qCWarning(log_ui_input) << "InputHandler::getEffectiveVideoWidget - m_videoPane is null or destroyed!";
         return nullptr;
     }
     
     // Return overlay widget if in GStreamer mode, otherwise return VideoPane
     if (m_videoPane->isDirectGStreamerModeEnabled()) {
         QWidget* overlayWidget = m_videoPane->getOverlayWidget();
-        if (overlayWidget) {
+        if (overlayWidget && overlayWidget->isVisible()) {
             return overlayWidget;
         }
     }
     
-    return m_videoPane;
+    return m_videoPane.data();  // Get raw pointer from QPointer
 }

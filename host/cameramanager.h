@@ -14,9 +14,12 @@
 #include <QSize>
 #include <QVideoFrameFormat>
 #include "host/multimediabackend.h"
+#include "../device/DeviceInfo.h"
 
 // Forward declarations
 class GStreamerBackendHandler;
+class FFmpegBackendHandler;
+class QtBackendHandler;
 class VideoPane;
 
 // Struct to represent a video format key, used for comparing and sorting video formats
@@ -58,7 +61,17 @@ public:
     void takeAreaImage(const QString& file, const QRect& captureArea);
     void startRecording();
     void stopRecording();
+    void pauseRecording();
+    void resumeRecording();
+    bool isRecording() const;
+    bool isPaused() const;
+    
+    // Manual recovery methods for recording system issues
+    void recoverRecordingSystem();
+    QString getRecordingDiagnosticsReport() const;
     QCamera* getCamera() const { return m_camera.get(); }
+    QMediaRecorder* getMediaRecorder() const { return m_mediaRecorder.get(); }
+    QMediaCaptureSession* getCaptureSession() { return &m_captureSession; }
     void setVideoOutput(QGraphicsVideoItem* videoOutput);
     void setCameraFormat(const QCameraFormat &format);
     QCameraFormat getCameraFormat() const;
@@ -96,9 +109,15 @@ public:
     int getOptimalFrameRate(int desiredFrameRate) const;
     QList<int> getAllSupportedFrameRates() const;
     void validateCameraFormat(const QCameraFormat& format) const;
+    
     // Helper methods to detect current multimedia backend
     bool isGStreamerBackend() const;
     bool isFFmpegBackend() const;
+    bool isQtBackend() const;
+    
+    // Get backend handlers for advanced features
+    FFmpegBackendHandler* getFFmpegBackend() const;
+    MultimediaBackendHandler* getBackendHandler() const;
     
     // Camera device management and switching
     QList<QCameraDevice> getAvailableCameraDevices() const;
@@ -133,6 +152,7 @@ signals:
     void cameraSettingsApplied();
     void recordingStarted();
     void recordingStopped();
+    void recordingError(const QString &errorString);
     void cameraError(const QString &errorString);
     void resolutionsUpdated(int input_width, int input_height, float input_fps, int capture_width, int capture_height, int capture_fps, float pixelClk);
     void imageCaptured(int id, const QImage& img);
@@ -155,6 +175,20 @@ private slots:
     void handleCameraTimeout();
 
 private:
+    // Helper method to generate a file path for recording
+    QString generateRecordingFilePath() const;
+    
+    // Configure media recorder with proper format and settings
+    void configureMediaRecorderForRecording(const QString& outputPath);
+    
+    // Reset the recording system if it gets into a bad state
+    void resetRecordingSystem();
+    
+    // Diagnostic functions for debugging recording issues
+    QString getRecordingSystemDiagnostics() const;
+    QString getMediaRecorderErrorInfo(QMediaRecorder::Error error) const;
+    void dumpRecordingSystemState() const;
+    
     std::unique_ptr<QCamera> m_camera;
     QMediaCaptureSession m_captureSession;
     std::unique_ptr<QImageCapture> m_imageCapture;
@@ -175,11 +209,15 @@ private:
     QString m_currentCameraPortChain;  // Track the port chain of current camera device
     QList<QCameraDevice> m_availableCameraDevices;
     
+    // Recording management
+    QString m_currentRecordingPath;  // Path to the current recording file
+    
     // Helper method for device ID matching
     QString extractShortIdentifier(const QString& fullId) const;
 
     // Declaration for findMatchingCameraDevice
     QCameraDevice findMatchingCameraDevice(const QString& portChain) const;
+    QCameraDevice findCameraByDeviceInfo(const DeviceInfo& deviceInfo) const;
 
     // Backend handler management
     void initializeBackendHandler();

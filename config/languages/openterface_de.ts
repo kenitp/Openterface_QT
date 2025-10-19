@@ -4,45 +4,162 @@
 <context>
     <name>AudioPage</name>
     <message>
-        <location filename="../../ui/preferences/audiopage.cpp" line="39"/>
-        <source>General audio setting</source>
-        <translation>Allgemeine Audio-Einstellungen</translation>
+        <location filename="../../ui/preferences/audiopage.cpp" line="54"/>
+        <source>Audio Device Selection</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/audiopage.cpp" line="42"/>
-        <source>Audio Codec: </source>
-        <translation>Audio-Codec: </translation>
+        <location filename="../../ui/preferences/audiopage.cpp" line="59"/>
+        <source>Audio Input Device:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/audiopage.cpp" line="47"/>
-        <source>Sample Rate: </source>
-        <translation>Abtastrate: </translation>
+        <location filename="../../ui/preferences/audiopage.cpp" line="63"/>
+        <source>Select the audio input device for capturing audio</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/audiopage.cpp" line="53"/>
-        <source>Quality: </source>
-        <translation>Qualität: </translation>
+        <location filename="../../ui/preferences/audiopage.cpp" line="65"/>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/audiopage.cpp" line="60"/>
-        <source>File Format: </source>
-        <translation>Dateiformat: </translation>
+        <location filename="../../ui/preferences/audiopage.cpp" line="67"/>
+        <source>Refresh the list of available audio devices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="74"/>
+        <location filename="../../ui/preferences/audiopage.cpp" line="295"/>
+        <location filename="../../ui/preferences/audiopage.cpp" line="329"/>
+        <source>Current Device: None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="79"/>
+        <source>Audio Recording Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="84"/>
+        <source>Audio Codec:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="89"/>
+        <source>Select the audio codec for recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="95"/>
+        <source>Sample Rate:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="103"/>
+        <source>Set the audio sample rate (Hz)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="109"/>
+        <source>Bitrate:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="117"/>
+        <source>Set the audio bitrate (kbps)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="123"/>
+        <source>Quality:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="132"/>
+        <source>Adjust audio quality (1=lowest, 10=highest)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="145"/>
+        <source>Container Format:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="150"/>
+        <source>Select the container format for recordings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="156"/>
+        <source>Live Audio Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="161"/>
+        <source>Enable Audio Pass-through</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="164"/>
+        <source>Enable real-time audio pass-through from input to output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="169"/>
+        <source>Volume:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="178"/>
+        <source>Adjust audio volume (0-100%)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="293"/>
+        <source>No audio devices found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="312"/>
+        <source> (Default)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/audiopage.cpp" line="327"/>
+        <location filename="../../ui/preferences/audiopage.cpp" line="351"/>
+        <source>Current Device: %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>CornerWidgetManager</name>
     <message>
-        <location filename="../../ui/cornerwidget/cornerwidgetmanager.cpp" line="57"/>
+        <location filename="../../ui/cornerwidget/cornerwidgetmanager.cpp" line="59"/>
         <source>Select Keyboard Layout</source>
         <translation type="unfinished">Tastaturlayout auswählen</translation>
+    </message>
+    <message>
+        <location filename="../../ui/cornerwidget/cornerwidgetmanager.cpp" line="130"/>
+        <source>Stop Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/cornerwidget/cornerwidgetmanager.cpp" line="130"/>
+        <source>Start Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DeviceCoordinator</name>
+    <message>
+        <location filename="../../ui/coordinator/devicecoordinator.cpp" line="101"/>
+        <source>No devices available</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>EnvironmentSetupDialog</name>
-    <message>
-        <source>Environment Setup</source>
-        <translation type="vanished">Umgebungseinrichtung</translation>
-    </message>
     <message>
         <location filename="../../ui/advance/envdialog.ui" line="6"/>
         <source>Environment Helper</source>
@@ -94,23 +211,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;a href=&quot;#&quot;&gt;Environment Setup Documentation&lt;/a&gt;</source>
-        <translation type="vanished">&lt;a href=&quot;#&quot;&gt;Dokumentation zur Umgebungseinrichtung&lt;/a&gt;</translation>
-    </message>
-    <message>
-        <source> The driver is installed. No further action is required.</source>
-        <translation type="vanished"> Der Treiber ist installiert. Es sind keine weiteren Aktionen erforderlich.</translation>
-    </message>
-    <message>
-        <source> The driver is missing. Openterface Mini-KVM will install it automatically.</source>
-        <translation type="vanished"> Der Treiber fehlt. Openterface Mini-KVM wird ihn automatisch installieren.</translation>
-    </message>
-    <message>
-        <source>The following steps help you install the driver and add user to correct group. Current status:
-</source>
-        <translation type="vanished">Die folgenden Schritte helfen Ihnen, den Treiber zu installieren und den Benutzer zur richtigen Gruppe hinzuzufügen. Aktueller Status:</translation>
-    </message>
-    <message>
         <location filename="../../ui/advance/envdialog.cpp" line="120"/>
         <source> The device is not plugged in. Please plug it in and try again.</source>
         <translation type="unfinished"> Das Gerät ist nicht angeschlossen. Bitte schließen Sie es an und versuchen Sie es erneut.</translation>
@@ -120,10 +220,6 @@
         <location filename="../../ui/advance/envdialog.cpp" line="142"/>
         <source>‣ Driver Installed: </source>
         <translation>‣ Treiber installiert: </translation>
-    </message>
-    <message>
-        <source>‣ In Dialout Group: </source>
-        <translation type="vanished">‣ In Dialout-Gruppe: </translation>
     </message>
     <message>
         <location filename="../../ui/advance/envdialog.cpp" line="111"/>
@@ -195,10 +291,6 @@
         <location filename="../../ui/advance/envdialog.cpp" line="265"/>
         <source>Serial port Permission: </source>
         <translation type="unfinished">Serielle Schnittstellenberechtigung: </translation>
-    </message>
-    <message>
-        <source>In Dialout Group: </source>
-        <translation type="vanished">In Dialout-Gruppe: </translation>
     </message>
     <message>
         <location filename="../../ui/advance/envdialog.cpp" line="107"/>
@@ -489,41 +581,46 @@ Bitte versuchen Sie es erneut nach einem Neustart der Anwendung.</translation>
     </message>
     <message>
         <location filename="../../ui/preferences/logpage.cpp" line="55"/>
+        <source>Backend</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/preferences/logpage.cpp" line="56"/>
         <source>Enable file logging</source>
         <translation>Dateiprotokollierung aktivieren</translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/logpage.cpp" line="57"/>
+        <location filename="../../ui/preferences/logpage.cpp" line="58"/>
         <source>Browse</source>
         <translation>Durchsuchen</translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/logpage.cpp" line="58"/>
+        <location filename="../../ui/preferences/logpage.cpp" line="59"/>
         <source>Inhibit Screen Saver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/logpage.cpp" line="83"/>
+        <location filename="../../ui/preferences/logpage.cpp" line="86"/>
         <source>General log setting</source>
         <translation>Allgemeine Log-Einstellungen</translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/logpage.cpp" line="87"/>
+        <location filename="../../ui/preferences/logpage.cpp" line="90"/>
         <source>Check the check box to see the corresponding log in the QT console.</source>
         <translation>Aktivieren Sie das Kontrollkästchen, um das entsprechende Protokoll in der QT-Konsole zu sehen.</translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/logpage.cpp" line="92"/>
+        <location filename="../../ui/preferences/logpage.cpp" line="95"/>
         <source>Screen Saver setting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/logpage.cpp" line="96"/>
+        <location filename="../../ui/preferences/logpage.cpp" line="99"/>
         <source>Inhibit the screen saver when the application is running.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/preferences/logpage.cpp" line="117"/>
+        <location filename="../../ui/preferences/logpage.cpp" line="120"/>
         <source>Select Log Directory</source>
         <translation>Log-Verzeichnis auswählen</translation>
     </message>
@@ -534,14 +631,6 @@ Bitte versuchen Sie es erneut nach einem Neustart der Anwendung.</translation>
         <location filename="../../ui/mainwindow.ui" line="12"/>
         <source>Openterface Mini-KVM</source>
         <translation>Openterface Mini-KVM</translation>
-    </message>
-    <message>
-        <source>Select Keyboard Layout</source>
-        <translation type="vanished">Tastaturlayout auswählen</translation>
-    </message>
-    <message>
-        <source>US QWERTY</source>
-        <translation type="vanished">US QWERTY</translation>
     </message>
     <message>
         <location filename="../../ui/mainwindow.ui" line="50"/>
@@ -599,325 +688,729 @@ Bitte versuchen Sie es erneut nach einem Neustart der Anwendung.</translation>
         <translation>Erweitert</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="148"/>
+        <location filename="../../ui/mainwindow.ui" line="149"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="153"/>
+        <location filename="../../ui/mainwindow.ui" line="154"/>
         <source>Change Settings</source>
         <translation>Einstellungen ändern</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="158"/>
+        <location filename="../../ui/mainwindow.ui" line="159"/>
         <source>Reset Serial Port</source>
         <translation>Seriellen Port zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="163"/>
+        <location filename="../../ui/mainwindow.ui" line="164"/>
         <source>Serial Console</source>
         <translation>Serielle Konsole</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="168"/>
+        <location filename="../../ui/mainwindow.ui" line="169"/>
         <source>AutoReszie</source>
         <translation>Automatische Größenanpassung</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="173"/>
+        <location filename="../../ui/mainwindow.ui" line="174"/>
         <source>Factory Reset HID Chip</source>
         <translation>Werkseinstellungen des HID-Chips zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="178"/>
+        <location filename="../../ui/mainwindow.ui" line="179"/>
         <source>Preferences</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="183"/>
+        <location filename="../../ui/mainwindow.ui" line="184"/>
         <source>Office Website</source>
         <translation>Offizielle Website</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="188"/>
+        <location filename="../../ui/mainwindow.ui" line="189"/>
         <source>Purchase</source>
         <translation>Kaufen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="193"/>
+        <location filename="../../ui/mainwindow.ui" line="194"/>
         <source>Feedback</source>
         <translation>Feedback</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="198"/>
+        <location filename="../../ui/mainwindow.ui" line="199"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="203"/>
+        <location filename="../../ui/mainwindow.ui" line="204"/>
         <source>Environment</source>
         <translation>Umgebung</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="208"/>
+        <location filename="../../ui/mainwindow.ui" line="209"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="219"/>
+        <location filename="../../ui/mainwindow.ui" line="220"/>
         <source>Follow Switch</source>
         <translation>Schalter folgen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="227"/>
+        <location filename="../../ui/mainwindow.ui" line="228"/>
         <source>Paste</source>
         <translation>Einfügen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="230"/>
+        <location filename="../../ui/mainwindow.ui" line="231"/>
         <source>Paste clipboard content to target</source>
         <translation>Inhalt der Zwischenablage in Ziel einfügen</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="235"/>
+        <location filename="../../ui/mainwindow.ui" line="236"/>
         <source>Script Tool</source>
         <translation>Skript-Tool</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="240"/>
+        <location filename="../../ui/mainwindow.ui" line="241"/>
+        <source>Video Recording Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.ui" line="244"/>
+        <source>Configure video recording settings and start/stop recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.ui" line="249"/>
         <source>TCP Server</source>
         <translation>TCP-Server</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="245"/>
+        <location filename="../../ui/mainwindow.ui" line="254"/>
         <source>Environment Checking</source>
         <translation>Umgebungsprüfung</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="250"/>
+        <location filename="../../ui/mainwindow.ui" line="259"/>
         <source>Firmware Manager</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="255"/>
+        <location filename="../../ui/mainwindow.ui" line="264"/>
         <source>Firmware Update...</source>
         <translation>Firmware-Aktualisierung...</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="260"/>
+        <location filename="../../ui/mainwindow.ui" line="269"/>
         <source>Device Selector</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="263"/>
+        <location filename="../../ui/mainwindow.ui" line="272"/>
         <source>Open Device Selector Dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="268"/>
+        <location filename="../../ui/mainwindow.ui" line="277"/>
         <source>Update Display Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="271"/>
+        <location filename="../../ui/mainwindow.ui" line="280"/>
         <source>Update display name and serial number in EDID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="280"/>
+        <location filename="../../ui/mainwindow.ui" line="289"/>
         <source>115200</source>
         <translation>115200</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="288"/>
+        <location filename="../../ui/mainwindow.ui" line="297"/>
         <source>9600</source>
         <translation>9600</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="298"/>
+        <location filename="../../ui/mainwindow.ui" line="307"/>
         <source>To Host</source>
         <translation>Zum Host</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="306"/>
+        <location filename="../../ui/mainwindow.ui" line="315"/>
         <source>To Target</source>
         <translation>Zum Ziel</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="319"/>
+        <location filename="../../ui/mainwindow.ui" line="328"/>
         <source>Absolute</source>
         <translation>Absolut</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="327"/>
+        <location filename="../../ui/mainwindow.ui" line="336"/>
         <source>Relative</source>
         <translation>Relativ</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="340"/>
+        <location filename="../../ui/mainwindow.ui" line="349"/>
         <source>Auto Hide</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="343"/>
+        <location filename="../../ui/mainwindow.ui" line="352"/>
         <source>Auto hide mouse cursor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="351"/>
+        <location filename="../../ui/mainwindow.ui" line="360"/>
         <source>Always Show</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.ui" line="354"/>
+        <location filename="../../ui/mainwindow.ui" line="363"/>
         <source>Always show mouse cursor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Zoom in</source>
-        <translation type="vanished">Vergrößern</translation>
-    </message>
-    <message>
-        <source>Zoom out</source>
-        <translation type="vanished">Verkleinern</translation>
-    </message>
-    <message>
-        <source>Restore original size</source>
-        <translation type="vanished">Ursprüngliche Größe wiederherstellen</translation>
-    </message>
-    <message>
-        <source>Function key and composite key</source>
-        <translation type="vanished">Funktionstaste und Kombinationstaste</translation>
-    </message>
-    <message>
-        <source>Paste text to target</source>
-        <translation type="vanished">Text in Ziel einfügen</translation>
-    </message>
-    <message>
-        <source>Mouse dance</source>
-        <translation type="vanished">Maustanz</translation>
-    </message>
-    <message>
-        <source>Full screen capture</source>
-        <translation type="vanished">Vollbildaufnahme</translation>
-    </message>
-    <message>
-        <source>Full screen mode</source>
-        <translation type="vanished">Vollbildmodus</translation>
-    </message>
-    <message>
-        <location filename="../../ui/mainwindow.cpp" line="1102"/>
+        <location filename="../../ui/mainwindow.cpp" line="496"/>
         <source>Recorded %1 sec</source>
         <translation>Aufgezeichnet %1 Sek.</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.cpp" line="1283"/>
+        <location filename="../../ui/mainwindow.cpp" line="570"/>
+        <location filename="../../ui/mainwindow.cpp" line="577"/>
+        <location filename="../../ui/mainwindow.cpp" line="604"/>
+        <location filename="../../ui/mainwindow.cpp" line="608"/>
+        <source>Recording Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="571"/>
+        <source>Recording system is not initialized. Please restart the application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="578"/>
+        <source>Camera system is not initialized. Please restart the application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="587"/>
+        <source>No Camera Available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="588"/>
+        <source>No camera devices detected. Please connect a camera and try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="590"/>
+        <source>Camera Not Active</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="591"/>
+        <source>Camera is not active. Please start the camera preview before recording.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="605"/>
+        <source>An unexpected error occurred: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="609"/>
+        <source>An unexpected error occurred. Please try again or restart the application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="620"/>
+        <source>Active Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="621"/>
+        <source>There is an active recording session. Do you want to stop it before changing settings?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/mainwindow.cpp" line="809"/>
         <source>Image Capture Error</source>
         <translation>Bildaufnahmefehler</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.cpp" line="1444"/>
+        <location filename="../../ui/mainwindow.cpp" line="878"/>
         <source>Captured &quot;%1&quot;</source>
         <translation>Erfasst &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.cpp" line="1998"/>
+        <location filename="../../ui/mainwindow.cpp" line="1362"/>
         <source>Firmware Update</source>
         <translation>Firmware-Aktualisierung</translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.cpp" line="1999"/>
+        <location filename="../../ui/mainwindow.cpp" line="1363"/>
         <source>The firmware is up to date.
 Current version: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.cpp" line="2021"/>
+        <location filename="../../ui/mainwindow.cpp" line="1385"/>
         <source>Firmware fetch timeout</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/mainwindow.cpp" line="2022"/>
+        <location filename="../../ui/mainwindow.cpp" line="1386"/>
         <source>Firmware retrieval timed out. Please check your network connection and try again.
 Current version: </source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>RecordingController</name>
     <message>
-        <source>The firmware is up to date.</source>
-        <translation type="vanished">Die Firmware ist auf dem neuesten Stand.</translation>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="136"/>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="158"/>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="539"/>
+        <source>Recording Error</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Firmware Update Confirmation</source>
-        <translation type="vanished">Bestätigung der Firmware-Aktualisierung</translation>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="137"/>
+        <source>No active camera device for recording. Please ensure a camera is connected.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Current firmware version: </source>
-        <translation type="vanished">Aktuelle Firmware-Version: </translation>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="159"/>
+        <source>Cannot start recording - camera system not initialized.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Latest firmware version: </source>
-        <translation type="vanished">Neueste Firmware-Version: </translation>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="344"/>
+        <source>Start Recording</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The update process will:
-</source>
-        <translation type="vanished">Der Aktualisierungsprozess wird:
-</translation>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="349"/>
+        <source>Stop Recording</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The update process will:</source>
-        <translation type="vanished">Der Aktualisierungsprozess wird:</translation>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="354"/>
+        <source>Pause Recording</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>1. Stop all video and USB operations
-2. Install new firmware
-3. Close the application automatically
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="359"/>
+        <source>Resume Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="364"/>
+        <source>Recording Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="370"/>
+        <source>Reset Recording System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="376"/>
+        <source>Recording Diagnostics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="516"/>
+        <source>Failed to start recording.
 
-Important:
-• Use a high-quality USB cable for host connection
-• Disconnect the HDMI cable
-• Do not interrupt power during update
-• Restart application after completion
+Possible causes:
+- Insufficient disk space
+- Permission issues with output folder
+- Camera device is busy or disconnected
+- Codec not supported on this system
 
-Do you want to proceed with the update?</source>
-        <translation type="vanished">1. Alle Video- und USB-Vorgänge stoppen
-2. Neue Firmware installieren
-3. Anwendung automatisch schließen
+Technical details: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="523"/>
+        <source>Failed to save recording.
 
-Wichtig:
-• Verwenden Sie ein hochwertiges USB-Kabel für die Host-Verbindung
-• Trennen Sie das HDMI-Kabel
-• Unterbrechen Sie die Stromversorgung während der Aktualisierung nicht
-• Starten Sie die Anwendung nach Abschluss neu
+Possible causes:
+- Insufficient disk space
+- Permission issues with output folder
+- Drive disconnected during recording
 
-Möchten Sie mit der Aktualisierung fortfahren?</translation>
+Technical details: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="529"/>
+        <source>The recording file may be corrupted.
+
+Possible causes:
+- Recording stopped unexpectedly
+- System resource issues
+- Hardware acceleration problems
+
+Technical details: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="535"/>
+        <source>An error occurred with the recording:
+%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="545"/>
+        <source>Retry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="561"/>
+        <source>Reset Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="562"/>
+        <source>Cannot reset recording system - camera manager is not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="570"/>
+        <source>Recording in Progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="571"/>
+        <source>A recording is currently in progress. Stop it and reset the recording system?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="585"/>
+        <source>Resetting recording system...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="599"/>
+        <source>System Reset Complete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="600"/>
+        <source>The recording system has been reset. Please try recording again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="608"/>
+        <source>Diagnostics Unavailable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="609"/>
+        <source>Cannot retrieve diagnostics - camera manager is not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="618"/>
+        <source>Recording System Diagnostics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="629"/>
+        <source>Copy to Clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/recording/recordingcontroller.cpp" line="630"/>
+        <source>Close</source>
+        <translation type="unfinished">Schließen</translation>
     </message>
 </context>
 <context>
-    <name>MetaDataDialog</name>
+    <name>RecordingSettingsDialog</name>
     <message>
-        <source>Openterface Mini KVM</source>
-        <translation type="vanished">Openterface Mini KVM</translation>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="64"/>
+        <source>Video Recording Settings</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>TechxArtisan</source>
-        <translation type="vanished">TechxArtisan</translation>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="218"/>
+        <source>Apply Settings</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Open</source>
-        <translation type="vanished">Öffnen</translation>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="219"/>
+        <source>Reset to Defaults</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set Metadata</source>
-        <translation type="vanished">Metadaten setzen</translation>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="220"/>
+        <source>Close</source>
+        <translation type="unfinished">Schließen</translation>
     </message>
     <message>
-        <source>Open Image</source>
-        <translation type="vanished">Bild öffnen</translation>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="232"/>
+        <source>Recording Controls</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Image Files (*.png *.jpg *.bmp)</source>
-        <translation type="vanished">Bilddateien (*.png *.jpg *.bmp)</translation>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="236"/>
+        <source>Backend: Detecting...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="240"/>
+        <source>Start Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="241"/>
+        <source>Stop Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="242"/>
+        <source>Pause</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="243"/>
+        <source>Resume</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="246"/>
+        <source>Status: Ready</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="247"/>
+        <source>Duration: 00:00:00</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="271"/>
+        <source>Video Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="277"/>
+        <source>Codec:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="284"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="771"/>
+        <source>GStreamer codecs: mjpeg (fast), x264enc (good compression), x265enc (best compression)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="287"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="774"/>
+        <source>FFmpeg codec: mjpeg (compatible with AVI format)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="292"/>
+        <source>Quality:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="294"/>
+        <source>Low</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="294"/>
+        <source>Medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="294"/>
+        <source>High</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="294"/>
+        <source>Ultra</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="294"/>
+        <source>Custom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="298"/>
+        <source>Bitrate (kbps):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="320"/>
+        <source>Output Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="326"/>
+        <source>Format:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="333"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="781"/>
+        <source>GStreamer formats: AVI (compatible), MP4 (modern), MKV (flexible)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="336"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="784"/>
+        <source>FFmpeg format: AVI (most compatible with custom build)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="341"/>
+        <source>Output Path:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="345"/>
+        <source>Browse...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="380"/>
+        <source>Error</source>
+        <translation type="unfinished">Fehler</translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="380"/>
+        <source>No video backend available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="388"/>
+        <source>Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="388"/>
+        <source>Recording is already in progress.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="419"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="680"/>
+        <source>Recording Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="420"/>
+        <source>Failed to start recording. Please check the settings and try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="446"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="606"/>
+        <source>Status: Recording to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="490"/>
+        <source>Status: Recording stopped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="503"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="512"/>
+        <source>Status: Recording stopped (with error)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="546"/>
+        <source>Save Recording As</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="548"/>
+        <source>Video Files (*.mp4 *.avi *.mov *.mkv *.webm);;All Files (*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="560"/>
+        <source>Warning</source>
+        <translation type="unfinished">Warnung</translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="560"/>
+        <source>No video backend available!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="583"/>
+        <source>Status: Settings applied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="640"/>
+        <source>Status: Recording stopped. File saved to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="649"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="686"/>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="696"/>
+        <source>Duration: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="659"/>
+        <source>Status: Recording paused</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="666"/>
+        <source>Status: Recording resumed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="677"/>
+        <source>Status: Recording error - %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="681"/>
+        <source>Recording failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="728"/>
+        <source>Backend: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="730"/>
+        <source>Backend: %1 (configured: %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="744"/>
+        <source>Backend: None available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="761"/>
+        <source>Windows Qt backend codecs: MJPEG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../ui/advance/recordingsettingsdialog.cpp" line="765"/>
+        <source>Windows Qt backend formats: MP4 (recommended), AVI (compatible), MOV (QuickTime)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1194,10 +1687,6 @@ Please:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Hardware</source>
-        <translation type="vanished">Hardware</translation>
-    </message>
-    <message>
         <location filename="../../ui/preferences/settingdialog.cpp" line="117"/>
         <source>OK</source>
         <translation>OK</translation>
@@ -1219,14 +1708,6 @@ Please:
         <location filename="../../ui/preferences/targetcontrolpage.cpp" line="38"/>
         <source>Target control setting</source>
         <translation>Zielsteuerungseinstellung</translation>
-    </message>
-    <message>
-        <source>UVC Camera resource: </source>
-        <translation type="vanished">UVC-Kamera-Ressource: </translation>
-    </message>
-    <message>
-        <source>Custom target USB Composite Device VID and PID: </source>
-        <translation type="vanished">Benutzerdefiniertes Ziel-USB-Composite-Gerät VID and PID: </translation>
     </message>
     <message>
         <location filename="../../ui/preferences/targetcontrolpage.cpp" line="42"/>
@@ -1313,10 +1794,6 @@ Please:
         <source>Enable custom USB flag</source>
         <translation>Aktivieren Sie das benutzerdefinierte USB-Flag</translation>
     </message>
-    <message>
-        <source>Enable file logging</source>
-        <translation type="vanished">Dateiprotokollierung aktivieren</translation>
-    </message>
 </context>
 <context>
     <name>UpdateDisplaySettingsDialog</name>
@@ -1357,137 +1834,117 @@ Please:
     </message>
     <message>
         <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="215"/>
-        <source>Extension Block Resolutions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="224"/>
-        <source>Select All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="225"/>
-        <source>Select None</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="226"/>
-        <source>Select Defaults</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="238"/>
         <source>Reading Firmware</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="241"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="552"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="218"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="524"/>
         <source>Reading firmware data...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="252"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="229"/>
         <source>Cancel Reading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="265"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="242"/>
         <source>Update</source>
         <translation type="unfinished">Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="269"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="246"/>
         <source>Cancel</source>
         <translation type="unfinished">Abbrechen</translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="307"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="279"/>
         <source>Enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="307"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="279"/>
         <source>Resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="307"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="279"/>
         <source>Refresh Rate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="307"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="279"/>
         <source>Source</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="393"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="398"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="405"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="415"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="420"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="427"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="365"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="370"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="377"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="387"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="392"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="399"/>
         <source>Invalid Input</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="393"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="365"/>
         <source>Display name cannot be empty when enabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="398"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="370"/>
         <source>Display name cannot exceed 13 characters.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="405"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="377"/>
         <source>Display name must contain only ASCII characters.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="415"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="387"/>
         <source>Serial number cannot be empty when enabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="420"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="392"/>
         <source>Serial number cannot exceed 13 characters.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="427"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="399"/>
         <source>Serial number must contain only ASCII characters.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="439"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="411"/>
         <source>No Updates Selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="439"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="411"/>
         <source>Please select at least one setting to update.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="446"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="418"/>
         <source>Display Name: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="449"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="421"/>
         <source>Serial Number: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="453"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="425"/>
         <source>Resolution Changes: %1 resolution(s) selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="456"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="428"/>
         <source>The following changes will be applied:
 
 %1
@@ -1496,174 +1953,174 @@ Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="458"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="430"/>
         <source>Confirm Updates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="468"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="440"/>
         <source>Update Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="468"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="440"/>
         <source>Failed to start the update process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="542"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="617"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="630"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="643"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="514"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="589"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="602"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="615"/>
         <source>Failed to read firmware - enter display name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="543"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="618"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="631"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="644"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="515"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="590"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="603"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="616"/>
         <source>Failed to read firmware - enter serial number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="739"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="711"/>
         <source>Error reading firmware - enter display name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="740"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="712"/>
         <source>Error reading firmware - enter serial number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="654"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="626"/>
         <source>EDID not found - enter display name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="655"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="627"/>
         <source>EDID not found - enter serial number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="662"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="634"/>
         <source>Invalid EDID - enter display name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="663"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="635"/>
         <source>Invalid EDID - enter serial number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="678"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="650"/>
         <source>Enter new display name (max 13 characters)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="682"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="654"/>
         <source>No display name found - enter new name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="688"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="660"/>
         <source>Enter new serial number (max 13 characters)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="692"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="664"/>
         <source>No serial number found - enter new serial</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="745"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="717"/>
         <source>Firmware Read Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="746"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="718"/>
         <source>Failed to read firmware: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="786"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="758"/>
         <source>Reading cancelled - enter display name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="787"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="759"/>
         <source>Reading cancelled - enter serial number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1042"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1016"/>
         <source>Extension</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1715"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1693"/>
         <source>Firmware Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1715"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1693"/>
         <source>Failed to read firmware size.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1744"/>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1837"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1722"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1815"/>
         <source>Read Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1744"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1722"/>
         <source>Failed to read firmware from device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1761"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1739"/>
         <source>File Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1761"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1739"/>
         <source>Failed to read firmware file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1776"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1754"/>
         <source>Processing Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1776"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1754"/>
         <source>Failed to process EDID settings.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1807"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1785"/>
         <source>Success</source>
         <translation type="unfinished">Erfolg</translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1807"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1785"/>
         <source>Display settings updated successfully!\n\nPlease reconnect the device to see the changes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1810"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1788"/>
         <source>Write Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1810"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1788"/>
         <source>Failed to write firmware to device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1837"/>
+        <location filename="../../ui/advance/updatedisplaysettingsdialog.cpp" line="1815"/>
         <source>Firmware read failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1734,10 +2191,6 @@ Bitte überprüfen Sie Ihre Internetverbindung.
 <context>
     <name>VideoPage</name>
     <message>
-        <source>UVC Camera resource: </source>
-        <translation type="obsolete">UVC-Kamera-Ressource: </translation>
-    </message>
-    <message>
         <location filename="../../ui/preferences/videopage.cpp" line="97"/>
         <source>General video setting</source>
         <translation>Allgemeine Videoeinstellungen</translation>
@@ -1771,20 +2224,6 @@ Bitte überprüfen Sie Ihre Internetverbindung.
         <location filename="../../ui/preferences/videopage.cpp" line="144"/>
         <source>Note: Changing media backend requires application restart to take effect.</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/preferences/videopage.cpp" line="151"/>
-        <source>GStreamer Pipeline Template: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../ui/preferences/videopage.cpp" line="162"/>
-        <source>Available placeholders: %DEVICE%, %WIDTH%, %HEIGHT%, %FRAMERATE%</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Default pixel format</source>
-        <translation type="vanished">Standard-Pixelformat</translation>
     </message>
 </context>
 </TS>

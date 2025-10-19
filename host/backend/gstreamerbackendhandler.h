@@ -27,16 +27,21 @@
 #include <QProcess>
 #include <QWidget>
 #include <QTimer>
+#include <gst/gst.h>
+#include <gst/app/gstappsink.h>
 
 // Forward declarations for Qt types
 class QGraphicsVideoItem;
 class QGraphicsView;
 class VideoPane;
 
-// Forward declarations for GStreamer types
-typedef struct _GstElement GstElement;
-typedef struct _GstBus GstBus;
-typedef struct _GstMessage GstMessage;
+// Forward declarations for GStreamer types - now properly defined via includes above
+// typedef struct _GstElement GstElement;
+// typedef struct _GstBus GstBus;
+// typedef struct _GstMessage GstMessage;
+// typedef struct _GstPad GstPad;
+// typedef struct _GstAppSink GstAppSink;
+// typedef enum _GstFlowReturn GstFlowReturn;
 
 /**
  * @brief GStreamer backend handler implementation with direct pipeline support
@@ -75,6 +80,7 @@ public:
     void stopGStreamerPipeline();
     void setVideoOutput(QWidget* widget);
     void setVideoOutput(QGraphicsVideoItem* videoItem);  // Support for QGraphicsVideoItem
+    void setVideoOutput(VideoPane* videoPane);  // Support for VideoPane overlay
     
     // Enhanced methods based on working example
     bool checkCameraAvailable(const QString& device = "/dev/video0");
@@ -83,12 +89,45 @@ public:
     // Resolution and framerate configuration
     void setResolutionAndFramerate(const QSize& resolution, int framerate);
     
+    // Video scaling and render rectangle configuration
+    void updateVideoRenderRectangle(const QSize& widgetSize);
+    void updateVideoRenderRectangle(int x, int y, int width, int height);
+    
     // Pipeline string generation
-    QString generatePipelineString(const QString& device, const QSize& resolution, int framerate) const;
+    QString generatePipelineString(const QString& device, const QSize& resolution, int framerate, const QString& videoSink) const;
+
+    // Video recording methods
+    bool startRecording(const QString& outputPath, const QString& format = "mp4", int videoBitrate = 2000000) override;
+    void stopRecording() override;
+    void pauseRecording() override;
+    void resumeRecording() override;
+    bool isRecording() const override;
+    QString getCurrentRecordingPath() const override;
+    qint64 getRecordingDuration() const override;
+    
+    // Recording configuration
+    struct RecordingConfig {
+        QString outputPath;
+        QString format = "mp4";          // mp4, avi, mov, mkv
+        QString videoCodec = "x264enc";  // x264enc, x265enc, vp8enc, vp9enc
+        int videoBitrate = 2000000;      // 2 Mbps default
+        int videoQuality = 23;           // Quality setting
+        bool useHardwareAcceleration = false;
+    };
+    
+    void setRecordingConfig(const RecordingConfig& config);
+    RecordingConfig getRecordingConfig() const;
 
 private slots:
     void onPipelineMessage();
     void checkPipelineHealth();
+    
+    // Recording process signal handlers
+    void onRecordingProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void onRecordingProcessError(QProcess::ProcessError error);
+    
+    // Frame capture for recording
+    void captureAndWriteFrame();
 
 private:
     // GStreamer pipeline components
@@ -97,9 +136,23 @@ private:
     GstElement* m_sink;
     GstBus* m_bus;
     
+    // Recording pipeline components
+    GstElement* m_recordingPipeline;
+    GstElement* m_recordingTee;
+    GstElement* m_recordingValve;    // Controls recording flow
+    GstElement* m_recordingSink;
+    GstElement* m_recordingQueue;
+    GstElement* m_recordingEncoder;
+    GstElement* m_recordingVideoConvert;
+    GstElement* m_recordingMuxer;
+    GstElement* m_recordingFileSink;
+    GstElement* m_recordingAppSink;  // For frame capture
+    GstPad* m_recordingTeeSrcPad;
+    
     // Qt integration
     QWidget* m_videoWidget;
     QGraphicsVideoItem* m_graphicsVideoItem;  // Support for QGraphicsVideoItem
+    VideoPane* m_videoPane;  // Support for VideoPane overlay
     QTimer* m_healthCheckTimer;
     QProcess* m_gstProcess;  // Fallback for process-based approach
     
@@ -109,12 +162,53 @@ private:
     QSize m_currentResolution;
     int m_currentFramerate;
     
+    // Overlay setup state
+    bool m_overlaySetupPending;
+    
+    // Recording state
+    bool m_recordingActive;
+    bool m_recordingPaused;
+    QString m_recordingOutputPath;
+    RecordingConfig m_recordingConfig;
+    qint64 m_recordingStartTime;
+    qint64 m_recordingPausedTime;
+    qint64 m_totalPausedDuration;
+    int m_recordingFrameNumber;
+    
+    // Frame-based recording using external process
+    QProcess* m_recordingProcess;
+    QTimer* m_frameCaptureTimer;
+    
     // Helper methods
     bool initializeGStreamer();
     void cleanupGStreamer();
     bool embedVideoInWidget(QWidget* widget);
     bool embedVideoInGraphicsView(QGraphicsView* view);
+    bool embedVideoInVideoPane(VideoPane* videoPane);
     void handleGStreamerMessage(GstMessage* message);
+    void completePendingOverlaySetup();
+    
+    // Enhanced overlay methods
+    bool setupVideoOverlay(GstElement* videoSink, WId windowId);
+    void setupVideoOverlayForCurrentPipeline();
+    void refreshVideoOverlay();
+    
+    // Window validation for overlay setup
+    bool isValidWindowId(WId windowId) const;
+    
+    // Recording helper methods
+    bool initializeValveBasedRecording();
+    bool initializeFrameBasedRecording();
+    bool initializeDirectFilesinkRecording();
+    bool createRecordingBranch(const QString& outputPath, const QString& format, int videoBitrate);
+    bool createSeparateRecordingPipeline(const QString& outputPath, const QString& format, int videoBitrate);
+    void removeRecordingBranch();
+    QString generateRecordingElements(const QString& outputPath, const QString& format, int videoBitrate) const;
+    
+#ifdef HAVE_GSTREAMER
+    // GStreamer appsink callback for frame capture
+    GstFlowReturn onNewRecordingSample(GstAppSink* sink);
+#endif
 };
 
 #endif // GSTREAMERBACKENDHANDLER_H

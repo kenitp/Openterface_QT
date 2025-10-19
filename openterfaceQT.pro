@@ -21,6 +21,8 @@ SOURCES += main.cpp \
     host/cameramanager.cpp \
     host/multimediabackend.cpp \
     host/backend/qtmultimediabackendhandler.cpp \
+    host/backend/qtbackendhandler.cpp \
+    ui/initializer/mainwindowinitializer.cpp \
     ui/statusbar/statuswidget.cpp \
     video/videohid.cpp \
     video/firmwarewriter.cpp \
@@ -29,6 +31,9 @@ SOURCES += main.cpp \
     ui/mainwindow.cpp \
     ui/videopane.cpp \
     ui/globalsetting.cpp \
+    ui/coordinator/devicecoordinator.cpp \
+    ui/coordinator/menucoordinator.cpp \
+    ui/coordinator/windowlayoutcoordinator.cpp \
     ui/toolbar/toolbarmanager.cpp \
     ui/toolbar/toggleswitch.cpp \
     ui/loghandler.cpp \
@@ -51,6 +56,8 @@ SOURCES += main.cpp \
     ui/advance/firmwaremanagerdialog.cpp \
     ui/advance/renamedisplaydialog.cpp \
     ui/advance/updatedisplaysettingsdialog.cpp \
+    ui/advance/recordingsettingsdialog.cpp \
+    ui/recording/recordingcontroller.cpp \
     host/HostManager.cpp \
     serial/SerialPortManager.cpp \
     target/KeyboardManager.cpp \
@@ -68,7 +75,8 @@ SOURCES += main.cpp \
     ui/languagemanager.cpp \
     ui/screensavermanager.cpp \
     ui/screenscale.cpp \
-    ui/cornerwidget/cornerwidgetmanager.cpp
+    ui/cornerwidget/cornerwidgetmanager.cpp \
+    ui/windowcontrolmanager.cpp
 
 # Platform-specific backend handlers (exclude on Windows)
 !win32 {
@@ -91,6 +99,7 @@ HEADERS  += \
     host/cameramanager.h \
     host/multimediabackend.h \
     host/backend/qtmultimediabackendhandler.h \
+    host/backend/qtbackendhandler.h \
     ui/statusbar/statuswidget.h \
     video/videohid.h \
     video/firmwarewriter.h \
@@ -100,6 +109,10 @@ HEADERS  += \
     ui/videopane.h \
     ui/globalsetting.h \
     ui/statusevents.h \
+    ui/coordinator/devicecoordinator.h \
+    ui/coordinator/menucoordinator.h \
+    ui/coordinator/windowlayoutcoordinator.h \
+    ui/initializer/mainwindowinitializer.h \
     ui/toolbar/toolbarmanager.h \
     ui/toolbar/toggleswitch.h \
     ui/loghandler.h \
@@ -114,6 +127,8 @@ HEADERS  += \
     ui/advance/firmwaremanagerdialog.h \
     ui/advance/renamedisplaydialog.h \
     ui/advance/updatedisplaysettingsdialog.h \
+    ui/advance/recordingsettingsdialog.h \
+    ui/recording/recordingcontroller.h \
     ui/preferences/cameraadjust.h \
     ui/preferences/fpsspinbox.h \
     ui/preferences/settingdialog.h \
@@ -142,7 +157,8 @@ HEADERS  += \
     ui/languagemanager.h \
     ui/screensavermanager.h \
     ui/screenscale.h \
-    ui/cornerwidget/cornerwidgetmanager.h
+    ui/cornerwidget/cornerwidgetmanager.h \
+    ui/windowcontrolmanager.h
 
 FORMS    += \
     ui/mainwindow.ui \

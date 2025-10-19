@@ -30,7 +30,9 @@ public:
     void showDeviceUnplugged(const QString& portChain);
     void showCameraSwitching(const QString& fromDevice, const QString& toDevice);
     void showCameraSwitchComplete(const QString& device);
+    void setKeyStates(bool numLock, bool capsLock, bool scrollLock);
     void updateIconColor();
+    void showSerialAutoRestart(int attemptNumber, int maxAttempts, double lossRate);
 
 
 private:
@@ -41,7 +43,7 @@ private:
     QLabel *keyPressedLabel;
     QLabel *keyLabel;
     QColor iconColor;
-    QLabel *resetLabel;
+    QLabel *statusMessageLabel;
     
     // Message throttling to prevent flooding during device switches
     QTimer *m_messageTimer;
