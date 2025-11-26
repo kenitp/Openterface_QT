@@ -35,6 +35,7 @@
 #include "../help/helppane.h"
 #include "../videopane.h"
 #include "../../video/videohid.h"
+#include <QThread>
 #include "ui/TaskManager.h"
 #include "../coordinator/windowlayoutcoordinator.h"
 #include "../toolbar/toolbarmanager.h"
@@ -72,6 +73,7 @@ MainWindowInitializer::MainWindowInitializer(MainWindow *mainWindow, QObject *pa
     , m_menuCoordinator(nullptr)  // Will be created during initialization
     , m_languageManager(mainWindow->m_languageManager)
     , m_mouseEdgeTimer(nullptr)  // Will be created during initialization
+    , m_hidThread(nullptr)  // Will be created during initialization
 {
     qCDebug(log_ui_mainwindowinitializer) << "MainWindowInitializer created";
 }
@@ -203,6 +205,15 @@ void MainWindowInitializer::connectCornerWidgetSignals()
     connect(m_cornerWidgetManager, &CornerWidgetManager::toggleSwitchChanged, m_mainWindow, &MainWindow::onToggleSwitchStateChanged);
     connect(m_cornerWidgetManager, &CornerWidgetManager::keyboardLayoutChanged, m_mainWindow, &MainWindow::onKeyboardLayoutCombobox_Changed);
     connect(m_cornerWidgetManager, &CornerWidgetManager::recordingToggled, m_mainWindow, &MainWindow::toggleRecording);
+    connect(m_cornerWidgetManager, &CornerWidgetManager::muteToggled, m_mainWindow, &MainWindow::toggleMute);
+
+    // Connect layout changes to update corner widget position
+    // CRITICAL FIX: Capture specific pointers instead of 'this' to avoid dangling reference
+    CornerWidgetManager* cornerWidgetManager = m_cornerWidgetManager;
+    QMenuBar* menuBar = m_ui->menubar;
+    connect(coordinator, &WindowLayoutCoordinator::layoutChanged, cornerWidgetManager, [cornerWidgetManager, menuBar, coordinator](const QSize &size) {
+        cornerWidgetManager->updatePosition(size.width(), menuBar->height(), coordinator->isFullScreenMode());
+    });
 }
 
 void MainWindowInitializer::connectDeviceManagerSignals()
@@ -294,7 +305,11 @@ void MainWindowInitializer::setupToolbar()
     // - Third param: QObject parent for memory management
     m_windowControlManager = new WindowControlManager(m_mainWindow, m_toolbarManager->getToolbar(), m_mainWindow);
     m_mainWindow->m_windowControlManager = m_windowControlManager;
-    m_windowControlManager->setAutoHideEnabled(true);
+    
+    // CRITICAL DEBUG: Temporarily disable WindowControlManager to test if it's blocking menus
+    // m_windowControlManager->setAutoHideEnabled(true);
+    qDebug() << "[DEBUG] WindowControlManager auto-hide DISABLED for menu testing";
+    
     m_windowControlManager->setAutoHideDelay(5000);  // 5 seconds auto-hide delay
     m_windowControlManager->setEdgeDetectionThreshold(5);
     m_windowControlManager->setAnimationDuration(300);
@@ -315,6 +330,8 @@ void MainWindowInitializer::connectCameraSignals()
     connect(m_cameraManager, &CameraManager::cameraActiveChanged, m_mainWindow, &MainWindow::updateCameraActive);
     connect(m_cameraManager, &CameraManager::cameraError, m_mainWindow, &MainWindow::displayCameraError);
     connect(m_cameraManager, &CameraManager::imageCaptured, m_mainWindow, &MainWindow::processCapturedImage);
+    connect(m_deviceCoordinator, &DeviceCoordinator::deviceSwitchCompleted, m_mainWindow, &MainWindow::onDeviceSwitchCompleted);
+    connect(m_deviceCoordinator, &DeviceCoordinator::deviceSelected, m_mainWindow, &MainWindow::onDeviceSelected);
     connect(m_cameraManager, &CameraManager::resolutionsUpdated, m_mainWindow, &MainWindow::onResolutionsUpdated);
     
     // This lambda only does logging, so it's safe, but fix for consistency
@@ -331,6 +348,8 @@ void MainWindowInitializer::connectCameraSignals()
             m_videoPane, &VideoPane::onCameraDeviceSwitching);
     connect(m_cameraManager, &CameraManager::cameraDeviceSwitchComplete,
             m_videoPane, &VideoPane::onCameraDeviceSwitchComplete);
+    connect(m_cameraManager, &CameraManager::cameraActiveChanged,
+            m_videoPane, &VideoPane::onCameraActiveChanged);
 }
 
 void MainWindowInitializer::connectVideoHidSignals()
@@ -359,24 +378,39 @@ void MainWindowInitializer::initializeCamera()
     qCDebug(log_ui_mainwindowinitializer) << "Initializing camera...";
     m_mainWindow->initCamera();
     
-    // Capture specific pointers instead of 'this' to avoid dangling reference
-    // when initializer is destroyed after constructor completes
+    // Set up VideoPane with FFmpeg backend BEFORE device auto-selection
+    // This ensures the video pipeline is ready when the device is switched
     CameraManager* cameraManager = m_cameraManager;
     VideoPane* videoPane = m_videoPane;
-    QTimer::singleShot(200, m_mainWindow, [cameraManager, videoPane]() {
-        bool success = cameraManager->initializeCameraWithVideoOutput(videoPane);
-        if (success) {
-            qDebug() << "✓ Camera successfully initialized with video output";
-        } else {
-            qCWarning(log_ui_mainwindowinitializer) << "Failed to initialize camera with video output";
-        }
-    });
+    
+    // Initialize camera video pipeline WITHOUT starting capture yet
+    // The device auto-selection will start the capture with the correct device
+    bool success = cameraManager->initializeCameraWithVideoOutput(videoPane, false);
+    if (success) {
+        qCDebug(log_ui_mainwindowinitializer) << "✓ Camera video pipeline initialized (waiting for device selection)";
+    } else {
+        qCWarning(log_ui_mainwindowinitializer) << "Failed to initialize camera video pipeline";
+    }
 
     // Capture audioManager pointer directly to avoid dangling reference
     AudioManager* audioManager = m_mainWindow->m_audioManager;
-    QTimer::singleShot(300, m_mainWindow, [audioManager]() {
+    CornerWidgetManager* cornerWidgetManager = m_cornerWidgetManager;
+    QTimer::singleShot(300, m_mainWindow, [audioManager, cornerWidgetManager]() {
         audioManager->initializeAudio();
         qDebug() << "✓ Audio initialization triggered";
+        
+        // Restore mute state from settings
+        bool isMuted = GlobalSetting::instance().getAudioMuted();
+        if (isMuted) {
+            audioManager->setVolume(0.0);
+            qDebug() << "✓ Audio restored to muted state";
+        }
+        
+        // Update the mute button to reflect the saved state
+        if (cornerWidgetManager) {
+            cornerWidgetManager->restoreMuteState(isMuted);
+            qDebug() << "✓ Mute button state restored:" << (isMuted ? "muted" : "unmuted");
+        }
     });
 }
 
@@ -455,3 +489,4 @@ void MainWindowInitializer::finalize()
     GlobalVar::instance().setMouseAutoHide(GlobalSetting::instance().getMouseAutoHideEnable());
     m_mainWindow->initializeKeyboardLayouts();
 }
+

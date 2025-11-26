@@ -30,6 +30,10 @@
 #include <QCoreApplication>
 #include <QtPlugin>
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
 // Import static Qt plugins only when building with static plugins
 #if defined(QT_STATIC) || defined(QT_STATICPLUGIN)
 // Image format plugins
@@ -88,12 +92,17 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
             break;
     }
 
-    // QFile outFile("log.txt");
-    // outFile.open(QIODevice::WriteOnly | QIODevice::Append);
-    // QTextStream textStream(&outFile);
-    // textStream << txt << endl;
-    
-    std::cout << txt.toStdString() << std::endl;
+    // For Windows GUI applications, std::cout may not be available and can cause crashes
+    // Use OutputDebugString instead for debug output
+    // In static builds or Windows subsystem builds, stdout/stderr may not work
+#ifdef Q_OS_WIN
+    OutputDebugStringW(reinterpret_cast<const wchar_t*>(txt.utf16()));
+    OutputDebugStringW(L"\n");
+#else
+    // Use fprintf to stderr instead of std::cout to avoid C++ stream issues
+    fprintf(stderr, "%s\n", txt.toUtf8().constData());
+    fflush(stderr);
+#endif
 }
 
 void writeLog(const QString &message){
@@ -135,8 +144,9 @@ void suppressGLibMessages(const gchar *log_domain, GLogLevelFlags log_level, con
 
 void setupEnv(){
 #ifdef Q_OS_LINUX
-    // Only set QT_QPA_PLATFORM when not provided by the user
+    // Only set QT_QPA_PLATFORM when not provided by the user or launcher script
     const QByteArray currentPlatform = qgetenv("QT_QPA_PLATFORM");
+    const QByteArray launcherDetected = qgetenv("OPENTERFACE_LAUNCHER_PLATFORM");
     
     if (currentPlatform.isEmpty()) {
         // Check for available display systems
@@ -156,21 +166,27 @@ void setupEnv(){
             qDebug() << "Static build: No display detected, trying DISPLAY=:0 with xcb platform";
         }
         #else
-        // For dynamic builds, prefer XCB if DISPLAY is available
-        if (!x11Display.isEmpty()) {
+        // For dynamic builds, prefer XCB for better compatibility
+        // Only use Wayland if explicitly set by launcher script
+        if (!launcherDetected.isEmpty()) {
+            qDebug() << "Dynamic build: Using launcher script's platform detection:" << launcherDetected;
+        } else if (!x11Display.isEmpty()) {
+            // DISPLAY is set - use XCB
             qputenv("QT_QPA_PLATFORM", "xcb");
             qDebug() << "Dynamic build: Set QT_QPA_PLATFORM to xcb (DISPLAY available)";
         } else if (!waylandDisplay.isEmpty()) {
+            // Fallback to Wayland only if X11 is not available
             qputenv("QT_QPA_PLATFORM", "wayland");
-            qDebug() << "Dynamic build: Set QT_QPA_PLATFORM to wayland (WAYLAND_DISPLAY available)";
+            qDebug() << "Dynamic build: Set QT_QPA_PLATFORM to wayland (WAYLAND_DISPLAY available, X11 not found)";
         } else {
+            // No display found, try default settings
             qputenv("DISPLAY", ":0");
             qputenv("QT_QPA_PLATFORM", "xcb");
             qDebug() << "Dynamic build: No display detected, trying DISPLAY=:0 with xcb platform";
         }
         #endif
     } else {
-        qDebug() << "Current QT_QPA_PLATFORM:" << currentPlatform;
+        qDebug() << "QT_QPA_PLATFORM already set by launcher or user:" << currentPlatform;
     }
 #endif
 }
@@ -233,6 +249,14 @@ void applyMediaBackendSetting(){
             qputenv("GST_PLUGIN_PATH", bundledPluginPath.toUtf8());
             qputenv("GST_PLUGIN_SYSTEM_PATH", bundledPluginPath.toUtf8());
             qDebug() << "Using bundled GStreamer plugins from:" << bundledPluginPath;
+            // Also set GST_PLUGIN_SCANNER to point to the bundled helper binary if present
+            QString bundledScannerPath = appDirPath + "/../libexec/gstreamer-1.0/gst-plugin-scanner";
+            if (QFile::exists(bundledScannerPath)) {
+                qputenv("GST_PLUGIN_SCANNER", bundledScannerPath.toUtf8());
+                qDebug() << "Using bundled gst-plugin-scanner at:" << bundledScannerPath;
+            } else {
+                qDebug() << "No bundled gst-plugin-scanner at:" << bundledScannerPath;
+            }
         } else {
             // Fallback to system plugins
             qputenv("GST_PLUGIN_PATH", "/usr/lib/gstreamer-1.0:/usr/lib/aarch64-linux-gnu/gstreamer-1.0:/usr/lib/x86_64-linux-gnu/gstreamer-1.0");
@@ -256,6 +280,15 @@ void applyMediaBackendSetting(){
 int main(int argc, char *argv[])
 {
     qDebug() << "Start openterface...";
+    
+    // Parse command-line arguments early to check for --skip-env-check
+    bool skipEnvironmentCheck = false;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--skip-env-check") == 0) {
+            skipEnvironmentCheck = true;
+            qDebug() << "Skip environment check flag detected";
+        }
+    }
     
     // Initialize GStreamer before Qt application
     #ifdef HAVE_GSTREAMER
@@ -293,13 +326,14 @@ int main(int argc, char *argv[])
     app.setWindowIcon(QIcon("://images/icon_32.png"));
     
     // Check if the environment is properly set up
-    if (EnvironmentSetupDialog::autoEnvironmentCheck() && !EnvironmentSetupDialog::checkEnvironmentSetup()) {
+    // If --skip-env-check is passed, skip the check
+    bool shouldCheckEnvironment = !skipEnvironmentCheck && EnvironmentSetupDialog::autoEnvironmentCheck();
+    if (shouldCheckEnvironment && !EnvironmentSetupDialog::checkEnvironmentSetup()) {
         EnvironmentSetupDialog envDialog;
         qDebug() << "Environment setup dialog opened";
         if (envDialog.exec() == QDialog::Rejected) {
-            qDebug() << "Driver dialog rejected";
-            QApplication::quit(); // Quit the application if the dialog is rejected
-            return 0;
+            qDebug() << "Driver dialog rejected - continuing anyway";
+            // Continue running the application even if dialog is rejected
         }
     } 
     
@@ -316,12 +350,9 @@ int main(int argc, char *argv[])
     KeyboardLayoutManager::getInstance().loadLayouts(keyboardConfigPath);
     
     
-    // writeLog("Environment setup completed");
     LanguageManager languageManager(&app);
     languageManager.initialize("en");
-    // writeLog("languageManager initialized");
     MainWindow window(&languageManager);
-    // writeLog("Application started");
     window.show();
 
     int result = app.exec();

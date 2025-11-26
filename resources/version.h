@@ -3,9 +3,9 @@
 // This file defines the application version.
 // Major release, Minor release, Patch number, Days since January 1st.
 // The patch number resets to 1 whenever the major or minor version is updated.
-// Please refer to update_version.py
+// Please refer to build-script/update_version.py
 
-#define APP_VERSION "0.5.3.289"
+#define APP_VERSION "0.5.5.329"
 #define STABLE_APP_VERSION "0.3.19"
 
 #endif // VERSION_H

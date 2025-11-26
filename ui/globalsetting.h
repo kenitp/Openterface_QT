@@ -54,6 +54,9 @@ public:
     void setMediaBackend(const QString &backend);
     QString getMediaBackend() const;
     
+    void setHardwareAcceleration(const QString &hwAccel);
+    QString getHardwareAcceleration() const;
+    
     void setGStreamerPipelineTemplate(const QString &pipelineTemplate);
     QString getGStreamerPipelineTemplate() const;
     
@@ -132,6 +135,10 @@ public:
     QString getRecordingOutputFormat() const;
     void setRecordingOutputPath(const QString& path);
     QString getRecordingOutputPath() const;
+    
+    // Audio mute setting
+    void setAudioMuted(bool muted);
+    bool getAudioMuted() const;
 
 private:
     QSettings m_settings;
